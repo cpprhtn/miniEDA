@@ -13,7 +13,7 @@ import seaborn as sns
 def find_outlier(data, sequence_length=10, load=False, epochs=50, data_target=str, data_time=str, data_val=str):
     data = pd.get_dummies(data, columns=[data_target])
 
-    # timestamps = data[data_time]  # 나중에 시각화를 위해 저장
+    timestamps = data[data_time]  # 나중에 시각화를 위해 저장
     data = data.drop(columns=[data_time])
 
     scaler = MinMaxScaler()
@@ -42,10 +42,10 @@ def find_outlier(data, sequence_length=10, load=False, epochs=50, data_target=st
     
     # 임계값 설정 및 이상 탐지 - 5%
     threshold = np.percentile(reconstruction_error, 95)
-    anomalies = reconstruction_error > threshold
+    outlier = reconstruction_error > threshold
 
     # 이상 데이터 출력
-    anomaly_data = data.iloc[sequence_length:][anomalies]
+    anomaly_data = data.iloc[sequence_length:][outlier]
     anomaly_data = pd.DataFrame(anomaly_data)
     test_data = anomaly_data.tail(100).transpose()
     df = pd.DataFrame(test_data[1:])
