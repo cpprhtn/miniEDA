@@ -94,12 +94,20 @@ def main():
         # Option to filter data based on a column value
         st.subheader('Filtering based on Column')
         filter_column = st.selectbox('Select column to filter', df.columns)
-        filter_value = st.text_input(f'Enter value to filter in column "{filter_column}"')
-        
+        is_reg = st.checkbox("use regex?")
+        if is_reg:
+             reg = st.text_input(f'Enter value to filter in column "{filter_column}"')
+        else:
+            filter_value = st.text_input(f'Enter value to filter in column "{filter_column}"')
+       
         if st.button('Filter Data'):
-            filtered_df = df[df[filter_column] == filter_value]
+            if is_reg:
+            # filtered_df = df[df[filter_column] == filter_value]
+                filtered_df = df[df[filter_column].str.contains(reg, regex=True)]
+            else:
+                filtered_df = df[df[filter_column] == filter_value]
             st.write('This data is not used. Download if necessary using the button on the top right.')
-            st.write(f'Filtered data for column "{filter_column}" where value is "{filter_value}":')
+            # st.write(f'Filtered data for column "{filter_column}" where value is "{filter_value}":')
             st.write(filtered_df)
 
         st.subheader('Setting Data Target (Time Series)')
