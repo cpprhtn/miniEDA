@@ -1,0 +1,5 @@
+# test env: py39 miniconda+conda-forge
+streamlit
+pandas
+numpy
+matplotlib
