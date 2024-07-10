@@ -3,6 +3,20 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 from PIL import Image
+from st_pages import Page, Section, show_pages, add_page_title, hide_pages
+
+
+add_page_title()
+
+show_pages(
+    [   
+        Page("main.py", "miniEDA", "🇰🇷"),
+
+        Section("DataFrame", "💻"),
+        Page("utils/dataframe.py", "Overview", "📚", in_section=True),
+    ]
+)
+
 
 # Function to fill missing times in a DataFrame
 def fill_missing_times(df, n, unit='minutes', time_column='timestamp', data_value='data_value', object_tag='tag', label=str, interpolate_option=str, dimension=3):
@@ -57,6 +71,9 @@ def concat_df(df, list, object_tag):
             
     return concat
 
+def get_info(df):
+    return df.info()
+
 def main():
     
     st.title('miniEDA')
@@ -77,7 +94,9 @@ def main():
         if transpose_data:
             df = df.transpose()
         st.subheader('DataFrame Preview')
-        st.write(df.head())
+        st.dataframe(df.head())
+        st.write("Number of missing values")
+        st.dataframe(df.isna().sum())
         
         # Option to rename columns
         # st.subheader('Modify Column Names')
@@ -200,3 +219,4 @@ def main():
         
 if __name__ == "__main__":
     main()
+
