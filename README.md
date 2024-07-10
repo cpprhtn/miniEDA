@@ -8,7 +8,7 @@
 - Filter by column
   - [x] select column
   - [x] find fullname data
-  - [ ] support regular expression
+  - [x] support regular expression
 - Support Time Series Data
   - [x] select time column
   - [x] select value column
