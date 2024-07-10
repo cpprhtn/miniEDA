@@ -60,7 +60,7 @@ def concat_df(df, list, object_tag):
 def main():
     
     st.title('miniEDA')
-    image = Image.open('./pandas.png')
+    image = Image.open('./assets/pandas.png')
     st.image(image)
     
     col1, col2 = st.columns([1, 1])
