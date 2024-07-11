@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
 import streamlit as st
-from st_pages import Page, Section, show_pages, add_page_title, hide_pages
+from st_pages import Page, Section, show_pages, add_page_title
 import dask.dataframe as dd
 import os
+from pathlib import Path
 
 project_start_path = os.getcwd()
 
@@ -84,34 +85,25 @@ def concat_df(df, list, data_colum):
             
     return concat
 
-from pathlib import Path
-def save_df(df, label="df"):
-    # file_path = Path(f'{label}.parquet')
-    relative_path = Path(os.path.join(project_start_path, 'cache', f'{label}.parquet'))
-    if relative_path.exists():
-        relative_path.unlink()
+def save_df(df, label="df", type=bool):
+    if type:
+        relative_path = Path(os.path.join(project_start_path, 'cache', f'{label}.parquet'))
+        if relative_path.exists():
+            relative_path.unlink()
+        df.to_parquet(relative_path)
+    else:
+        st.session_state[label] = df
 
-    # df.to_parquet(relative_path, index=False)
-    df.to_parquet(relative_path)
-    # print(os.getcwd())
-    # st.session_state[label] = df
-    
-    
-def load_df(label="df"):
-    relative_path = Path(os.path.join(project_start_path, 'cache', f'{label}.parquet'))
-    # return dd.from_pandas(pd.read_parquet(relative_path), npartitions=4)
-    return pd.read_parquet(relative_path)
-    
-    # if label in st.session_state:
-    #     return st.session_state[label]
 
-def save_session(df, label="df"):
-    st.session_state[label] = df
-    
-def load_session(label="df"):
-    if label in st.session_state:
-        return st.session_state[label]
-    
+def load_df(label="df", type=bool):
+    if type:
+        relative_path = Path(os.path.join(project_start_path, 'cache', f'{label}.parquet'))
+        # return dd.from_pandas(pd.read_parquet(relative_path), npartitions=4)
+        return pd.read_parquet(relative_path)
+    else:
+        if label in st.session_state:
+            return st.session_state[label]
+
 footer_html = """
 <style>
 footer {

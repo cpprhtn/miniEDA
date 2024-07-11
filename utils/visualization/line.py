@@ -3,7 +3,7 @@ import plotly.express as px
 
 page_title()
 
-df = load_df()
+df = load_df(type=st.session_state["LCSV"])
 
 if st.session_state["LCSV"]:
     st.dataframe(df.head())

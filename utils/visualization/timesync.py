@@ -4,11 +4,11 @@ import plotly.express as px
 page_title()
 
 
-df = load_df()
-marged_df = load_df("df1")
-data_index = load_session("data_index")
-data_colum = load_session("data_colum")
-data_value = load_session("data_value")
+df = load_df(type=st.session_state["LCSV"])
+marged_df = load_df("df1", st.session_state["LCSV"])
+data_index = load_df("data_index", st.session_state["LCSV"])
+data_colum = load_df("data_colum", st.session_state["LCSV"])
+data_value = load_df("data_value", st.session_state["LCSV"])
 
 if df is None:
     st.warning("Visit the 'Time Series' page first to generate data")

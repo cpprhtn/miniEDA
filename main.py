@@ -10,6 +10,10 @@ import dask.dataframe as dd
 
 page_title()
 
+# check cache folder
+if not os.path.exists("cache"):
+    os.makedirs("cache")
+
 image = Image.open('./assets/pandas.png')
 st.image(image)
 
@@ -25,10 +29,9 @@ if st.checkbox("Read Large Scale CSV"):
     uploaded_file = st.text_input("Write file path", "test.csv")
     if uploaded_file is not None:
         try:
-            df = dd.read_csv(uploaded_file, header=read_csv_header)
-            df = df.compute()
+            df = pd.read_csv(uploaded_file, header=read_csv_header)
             st.write(df.head())
-            save_df(df, "df")
+            save_df(df, "df", st.session_state["LCSV"])
         except FileNotFoundError:
             st.error('FileNotFoundError: Specified file not found') 
         
@@ -43,5 +46,5 @@ else:
         st.subheader('DataFrame Header')
         st.dataframe(df.head())
 
-        save_df(df, "df")
+        save_df(df, "df", st.session_state["LCSV"])
         

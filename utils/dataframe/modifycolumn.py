@@ -2,7 +2,7 @@ from utils.util import *
 
 page_title()
 
-df = load_df()
+df = load_df(type=st.session_state["LCSV"])
     
 st.subheader('Modify Column Names')
 new_columns = {}
@@ -15,4 +15,4 @@ if st.button('Rename Columns'):
     st.write('Updated DataFrame with new column names:')
     st.write(df.head())
 
-save_df(df, "df")
+save_df(df, "df", st.session_state["LCSV"])
