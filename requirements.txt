@@ -3,3 +3,4 @@ streamlit
 pandas
 numpy
 matplotlib
+st_pages
