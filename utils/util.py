@@ -19,6 +19,9 @@ def page_title():
             Section("Visualization", "💻"),
             Page("utils/visualization/timeseries.py", "Time Series", "📚", in_section=True),
             Page("utils/visualization/timesync.py", "Time Synchronization", "📚", in_section=True),
+            
+            Section("Custom", "💻"),
+            Page("utils/custom.py", "Custom", "📚", in_section=True),
 
         ]
     )
