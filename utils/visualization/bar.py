@@ -5,7 +5,10 @@ page_title()
 
 df = load_df()
 
-st.write(df)
+if st.session_state["LCSV"]:
+    st.dataframe(df.head())
+else:
+    st.dataframe(df)
 
 st.subheader('Select Data Target')
 data_x = st.selectbox("Select a column with x", df.columns)

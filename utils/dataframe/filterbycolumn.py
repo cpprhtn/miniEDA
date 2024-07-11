@@ -4,7 +4,10 @@ page_title()
 
 df = load_df()
 
-st.write(df)
+if st.session_state["LCSV"]:
+        st.dataframe(df.head())
+else:
+    st.dataframe(df)
 
 # Option to filter data based on a column value
 filter_column = st.selectbox('Select column to filter', df.columns)
@@ -21,4 +24,7 @@ if st.button('Filter Data'):
         filtered_df = df[df[filter_column] == filter_value]
     st.write('''This data is not applied by default.''')
     # st.write(f'Filtered data for column "{filter_column}" where value is "{filter_value}":')
-    st.dataframe(filtered_df, width=1000)
+    if st.session_state["LCSV"]:
+        st.dataframe(filtered_df.head(), width=1000)
+    else:
+        st.dataframe(filtered_df, width=1000)

@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 from st_pages import Page, Section, show_pages, add_page_title, hide_pages
+import dask.dataframe as dd
 
 def page_title():
     add_page_title()
@@ -81,11 +82,15 @@ def concat_df(df, list, data_colum):
     return concat
 
 def save_df(df, label="df"):
-    st.session_state[label] = df
+    df.to_parquet(f'./cache/{label}.parquet', index=False, overwrite=True)
+    # st.session_state[label] = df
+    
     
 def load_df(label="df"):
-    if label in st.session_state:
-        return st.session_state[label]
+    return dd.from_pandas(pd.read_parquet(f'./cache/{label}.parquet'), npartitions=4)
+    
+    # if label in st.session_state:
+    #     return st.session_state[label]
     
     
 footer_html = """

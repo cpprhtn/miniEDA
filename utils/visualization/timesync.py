@@ -38,7 +38,10 @@ else:
             except:
                 df_filled = fill_missing_times(df=df[df[data_colum] == i], n=n, unit=unit, data_index=data_index, data_value=data_value, data_colum=data_colum, label=i, interpolate_option=interpolate_option)
             st.write(i)
-            st.dataframe(df_filled)
+            if st.session_state["LCSV"]:
+                st.dataframe(df_filled.head())
+            else:
+                st.dataframe(df_filled)
             missing_cnt[i] = df_filled.isna().sum()[data_value]
             eda_df = pd.concat([eda_df, df_filled])
             

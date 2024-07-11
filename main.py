@@ -21,6 +21,7 @@ with col2:
 
 
 if st.checkbox("Read Large Scale CSV"):
+    st.session_state["LCSV"] = True
     uploaded_file = st.text_input("Write file path", "test.csv")
     if uploaded_file is not None:
         try:
@@ -32,6 +33,7 @@ if st.checkbox("Read Large Scale CSV"):
             st.error('FileNotFoundError: Specified file not found') 
         
 else:
+    st.session_state["LCSV"] = False
     uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
 
     if uploaded_file is not None:

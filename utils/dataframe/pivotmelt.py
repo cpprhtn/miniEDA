@@ -17,4 +17,7 @@ if pivot_button:
     pdf = df.pivot(index=data_index, columns=data_colum, values=data_value)
     st.subheader('Pivot DataFrame')
     st.write('This data is not used. Download if necessary using the button on the top right.')
-    st.dataframe(pdf)
+    if st.session_state["LCSV"]:
+        st.dataframe(pdf.head())
+    else:
+        st.dataframe(pdf)

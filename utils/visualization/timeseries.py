@@ -5,7 +5,10 @@ page_title()
 
 df = load_df()
 
-st.write(df)
+if st.session_state["LCSV"]:
+    st.dataframe(df.head())
+else:
+    st.dataframe(df)
 
 st.subheader('Select Data Target')
 data_index = st.selectbox("Select a column with time", df.columns)
@@ -51,4 +54,7 @@ try:
     save_df(data_colum, "data_colum")
     save_df(data_value, "data_value")
 except:
-    st.write(marged_df)
+    if st.session_state["LCSV"]:
+        st.dataframe(marged_df.head())
+    else:
+        st.dataframe(marged_df)
