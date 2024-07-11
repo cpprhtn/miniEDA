@@ -5,7 +5,7 @@ page_title()
 
 
 df = load_df()
-marged_df = load_df("time")
+marged_df = load_df("df1")
 data_index = load_df("data_index")
 data_colum = load_df("data_colum")
 data_value = load_df("data_value")

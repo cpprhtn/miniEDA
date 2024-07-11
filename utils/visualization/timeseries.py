@@ -46,7 +46,7 @@ try:
         labels={data_index: 'Datetime'})
     fig.update_traces(connectgaps=False)
     st.plotly_chart(fig)
-    save_df(marged_df, "time")
+    save_df(marged_df, "df1")
     save_df(data_index, "data_index")
     save_df(data_colum, "data_colum")
     save_df(data_value, "data_value")
