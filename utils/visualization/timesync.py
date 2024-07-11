@@ -31,6 +31,7 @@ else:
 
     if st.button("Search for Missing Data"):
         eda_df = pd.DataFrame()
+        missing_cnt = {}
         for i in marged_df[data_colum].unique():
             try:
                 df_filled = fill_missing_times(df=df[df[data_colum] == i], n=n, unit=unit, data_index=data_index, data_value=data_value, data_colum=data_colum, label=i, interpolate_option=interpolate_option, dimension=dimension)
@@ -38,10 +39,9 @@ else:
                 df_filled = fill_missing_times(df=df[df[data_colum] == i], n=n, unit=unit, data_index=data_index, data_value=data_value, data_colum=data_colum, label=i, interpolate_option=interpolate_option)
             st.write(i)
             st.dataframe(df_filled)
-            st.write("Missing Data")
-            st.write(df_filled.isna().sum())
+            missing_cnt[i] = df_filled.isna().sum()[data_value]
             eda_df = pd.concat([eda_df, df_filled])
-        
+            
         fig = px.line(eda_df, 
             x=data_index, 
             y=data_value, 
@@ -49,3 +49,5 @@ else:
             color=data_colum,
             labels={data_index: 'Datetime'})
         st.plotly_chart(fig)
+        missing_plot = pd.DataFrame(missing_cnt, index=[0])
+        st.dataframe(missing_plot)

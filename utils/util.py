@@ -19,6 +19,10 @@ def page_title():
             Section("Visualization", "💻"),
             Page("utils/visualization/timeseries.py", "Time Series", "📚", in_section=True),
             Page("utils/visualization/timesync.py", "Time Synchronization", "📚", in_section=True),
+            Page("utils/visualization/bar.py", "Bar Plot", "📚", in_section=True),            
+            Page("utils/visualization/line.py", "Line Plot", "📚", in_section=True),
+            Page("utils/visualization/scatter.py", "Scatter Plot", "📚", in_section=True),
+            Page("utils/visualization/heatmaps.py", "Heatmaps", "📚", in_section=True),
             
             Section("Custom", "💻"),
             Page("utils/custom.py", "Custom", "📚", in_section=True),
@@ -99,6 +103,7 @@ footer {
     color: black;
     background-color: #808080;
     padding: 1px 0;
+    z-index: 1000;
 }
 .main-footer a {
     color: #000;
