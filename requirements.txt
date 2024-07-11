@@ -5,3 +5,5 @@ numpy
 matplotlib
 st_pages
 dask
+plotly
+scipy
