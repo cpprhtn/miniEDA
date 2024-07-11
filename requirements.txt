@@ -4,6 +4,6 @@ pandas
 numpy
 matplotlib
 st_pages
-dask
+dask[dataframe]
 plotly
 scipy
