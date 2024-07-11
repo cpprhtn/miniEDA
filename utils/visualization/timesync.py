@@ -6,9 +6,10 @@ page_title()
 
 df = load_df()
 marged_df = load_df("df1")
-data_index = load_df("data_index")
-data_colum = load_df("data_colum")
-data_value = load_df("data_value")
+data_index = load_session("data_index")
+data_colum = load_session("data_colum")
+data_value = load_session("data_value")
+
 if df is None:
     st.warning("Visit the 'Time Series' page first to generate data")
 else:  

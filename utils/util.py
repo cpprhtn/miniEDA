@@ -3,6 +3,9 @@ import numpy as np
 import streamlit as st
 from st_pages import Page, Section, show_pages, add_page_title, hide_pages
 import dask.dataframe as dd
+import os
+
+project_start_path = os.getcwd()
 
 def page_title():
     add_page_title()
@@ -81,17 +84,33 @@ def concat_df(df, list, data_colum):
             
     return concat
 
+from pathlib import Path
 def save_df(df, label="df"):
-    df.to_parquet(f'./cache/{label}.parquet', index=False, overwrite=True)
+    # file_path = Path(f'{label}.parquet')
+    relative_path = Path(os.path.join(project_start_path, 'cache', f'{label}.parquet'))
+    if relative_path.exists():
+        relative_path.unlink()
+
+    # df.to_parquet(relative_path, index=False)
+    df.to_parquet(relative_path)
+    # print(os.getcwd())
     # st.session_state[label] = df
     
     
 def load_df(label="df"):
-    return dd.from_pandas(pd.read_parquet(f'./cache/{label}.parquet'), npartitions=4)
+    relative_path = Path(os.path.join(project_start_path, 'cache', f'{label}.parquet'))
+    # return dd.from_pandas(pd.read_parquet(relative_path), npartitions=4)
+    return pd.read_parquet(relative_path)
     
     # if label in st.session_state:
     #     return st.session_state[label]
+
+def save_session(df, label="df"):
+    st.session_state[label] = df
     
+def load_session(label="df"):
+    if label in st.session_state:
+        return st.session_state[label]
     
 footer_html = """
 <style>

@@ -3,7 +3,6 @@ from utils.util import *
 page_title()
 
 df = load_df()
-print(df)
 
 if df is None:
     st.warning("Visit 'miniEDA' main page and load .CSV file")

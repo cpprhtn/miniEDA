@@ -40,7 +40,11 @@ marged_df = concat_df(df, favorite_command["data"].unique(), data_colum)
 
 try:
     st.write("Merged Data")
-    st.dataframe(marged_df, width=1000)
+    # st.dataframe(marged_df, width=1000)
+    if st.session_state["LCSV"]:
+        st.dataframe(marged_df.head())
+    else:
+        st.dataframe(marged_df)
     fig = px.line(marged_df, 
         x=data_index, 
         y=data_value, 
@@ -50,11 +54,12 @@ try:
     fig.update_traces(connectgaps=False)
     st.plotly_chart(fig)
     save_df(marged_df, "df1")
-    save_df(data_index, "data_index")
-    save_df(data_colum, "data_colum")
-    save_df(data_value, "data_value")
+    save_session(data_index, "data_index")
+    save_session(data_colum, "data_colum")
+    save_session(data_value, "data_value")
 except:
-    if st.session_state["LCSV"]:
-        st.dataframe(marged_df.head())
-    else:
-        st.dataframe(marged_df)
+    # if st.session_state["LCSV"]:
+    #     st.dataframe(marged_df.head())
+    # else:
+    #     st.dataframe(marged_df)
+    st.write("No data selected. too.")
