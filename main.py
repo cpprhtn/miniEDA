@@ -5,6 +5,7 @@ import numpy as np
 from PIL import Image
 from st_pages import Page, Section, show_pages, add_page_title, hide_pages
 from utils.util import *
+import dask.dataframe as dd
 
 
 page_title()
@@ -18,15 +19,27 @@ with col1:
 with col2:
     transpose_data = st.checkbox("transpose?")
 
-# File uploader
-uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
 
-if uploaded_file is not None:
-    global df 
-    df = pd.read_csv(uploaded_file, header=read_csv_header, low_memory=False)
-    if transpose_data:
-        df = df.transpose()
-    st.subheader('DataFrame Header')
-    st.dataframe(df.head())
+if st.checkbox("Read Large Scale CSV"):
+    uploaded_file = st.text_input("Write file path", "test.csv")
+    if uploaded_file is not None:
+        try:
+            df = dd.read_csv(uploaded_file, header=read_csv_header)
+            df = df.compute()
+            st.write(df.head())
+            save_df(df, "df")
+        except FileNotFoundError:
+            st.error('FileNotFoundError: Specified file not found') 
+        
+else:
+    uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
 
-    save_df(df, "df")
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file, header=read_csv_header, low_memory=False)
+        if transpose_data:
+            df = df.transpose()
+        st.subheader('DataFrame Header')
+        st.dataframe(df.head())
+
+        save_df(df, "df")
+        
