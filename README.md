@@ -1,21 +1,24 @@
 # miniEDA
 
+### README
+1. Basically, the data is only converted and shown internally using the session of streamlit. The uploaded original data will not be transformed. (including apply button)
+
+2. If you would like to download the transformed data, please download it through the upper right corner above the Dataframe table.
+
+3. If the large data option is turned on, a ./cache directory is created, and csv is converted to that location to read and use data with the .parquet extension. If you specify a path on the miniEDA main page, csv is converted to ./cache, and if you leave the path empty and go to another page, it automatically reads the most recent imported dataset (./cache/df.parquet).
+
 ### install
 ```
 pip install -r requirements.txt
 ```
 ### run
 ```
-streamlit run main.py
-
-# --server.maxUploadSize 1000: Limit 1GB per file
-streamlit run main.py --server.maxUploadSize 1000
+streamlit run main.py  # --server.maxUploadSize 1000
+                       # Limit 1GB per file
 ```
 
-## Large Data test
-example dataset: [Kaggle 100-million-data-csv](https://www.kaggle.com/datasets/zanjibar/100-million-data-csv/data) 3GB `.csv`
-
 ### read & write test
+example dataset: [Kaggle 100-million-data-csv](https://www.kaggle.com/datasets/zanjibar/100-million-data-csv/data) 3GB `.csv`
 #### Writing:
 ```
   Time to write CSV: 135.87950 seconds
