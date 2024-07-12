@@ -19,6 +19,7 @@ def run_code(code, *dfs):
 
 if st.session_state["LCSV"]:
     st.dataframe(df.head())
+    st.write(f"row: {df.shape[0]}, col: {df.shape[1]}")
 else:
     st.dataframe(df)
 

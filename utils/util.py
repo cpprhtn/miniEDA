@@ -90,7 +90,7 @@ def save_df(df, label="df", type=bool):
         relative_path = Path(os.path.join(project_start_path, 'cache', f'{label}.parquet'))
         if relative_path.exists():
             relative_path.unlink()
-        df.to_parquet(relative_path)
+        df.to_parquet(relative_path, index=False)
     else:
         st.session_state[label] = df
 

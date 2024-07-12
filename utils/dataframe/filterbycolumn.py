@@ -3,9 +3,11 @@ from utils.util import *
 page_title()
 
 df = load_df(type=st.session_state["LCSV"])
+# df = df.astype(str)
 
 if st.session_state["LCSV"]:
         st.dataframe(df.head())
+        st.write(f"row: {df.shape[0]}, col: {df.shape[1]}")
 else:
     st.dataframe(df)
 
@@ -16,6 +18,10 @@ if is_reg:
         reg = st.text_input(f'Enter value to filter in column "{filter_column}"')
 else:
     filter_value = st.text_input(f'Enter value to filter in column "{filter_column}"')
+    try:
+        filter_value = int(filter_value)
+    except:
+        pass
 if st.button('Filter Data'):
     if is_reg:
     # filtered_df = df[df[filter_column] == filter_value]

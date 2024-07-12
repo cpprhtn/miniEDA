@@ -3,9 +3,9 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 from PIL import Image
-from st_pages import Page, Section, show_pages, add_page_title, hide_pages
 from utils.util import *
 import dask.dataframe as dd
+import pyarrow
 
 
 page_title()
@@ -34,6 +34,11 @@ if st.checkbox("Read Large Scale CSV"):
             save_df(df, "df", st.session_state["LCSV"])
         except FileNotFoundError:
             st.error('FileNotFoundError: Specified file not found') 
+        except pyarrow.lib.ArrowTypeError:
+            st.error('''Try to check "csv header"
+                     
+                     ArrowTypeError: ("Expected bytes, got a 'float' object", 'Conversion failed for column 2 with type object')
+                     ''')
         
 else:
     st.session_state["LCSV"] = False

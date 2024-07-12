@@ -7,6 +7,7 @@ df = load_df(type=st.session_state["LCSV"])
 
 if st.session_state["LCSV"]:
     st.dataframe(df.head())
+    st.write(f"row: {df.shape[0]}, col: {df.shape[1]}")
 else:
     st.dataframe(df)
 
