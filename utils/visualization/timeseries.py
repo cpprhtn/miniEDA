@@ -63,11 +63,15 @@ if st.checkbox("use selector"):
         st.write("No data selected. too.")
 
 else:
+    data_y = st.multiselect(
+    "Select data to use",
+    df.columns,
+    [])
+    
     if st.button("Draw"):
-        data_value = [col for col in df.columns if col != data_index]
         fig = px.line(df, 
                 x=data_index, 
-                y=data_value, 
+                y=data_y, 
                 title='Time Series Plot', 
                 labels={data_index: 'Datetime'})
         fig.update_traces(connectgaps=False)
