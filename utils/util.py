@@ -17,6 +17,8 @@ def page_title():
 
             Section("DataFrame", "💻"),
             Page("utils/dataframe/preview.py", "Data Preview", "📚", in_section=True),
+            Page("utils/dataframe/nan.py", "Remove NaN", "📚", in_section=True),
+            Page("utils/dataframe/slice.py", "Slice Data", "📚", in_section=True),
             Page("utils/dataframe/modifycolumn.py", "Modify Column Names", "📚", in_section=True),
             Page("utils/dataframe/filterbycolumn.py", "Filter by Column", "📚", in_section=True),
             Page("utils/dataframe/pivotmelt.py", "Pivot and Melt", "📚", in_section=True),
@@ -56,6 +58,8 @@ def fill_missing_times(df, n, unit='minutes', data_index='timestamp', data_value
         raise ValueError("Unit must be 'minutes', 'hours', or 'seconds'")
     
     df = df.set_index(data_index).resample(f'{n}{time_units[unit]}').asfreq().reset_index()
+    
+    
     if interpolate_option == "linear":
         df[data_value] = df[data_value].interpolate(method=interpolate_option)
     elif interpolate_option == "None":
@@ -71,6 +75,36 @@ def fill_missing_times(df, n, unit='minutes', data_index='timestamp', data_value
 
     df[data_colum] = label
     
+    return df
+
+def interpolate_data(df, n, unit='minutes', data_index=str, data_value=list, interpolate_option=str, dimension=None):
+    
+    df = df.copy()
+    df.loc[:, data_index] = pd.to_datetime(df[data_index])
+    
+    time_units = {
+        'minutes': 'min',
+        'hours': 'H',
+        'seconds': 'S'
+    }
+    
+    if unit not in time_units:
+        raise ValueError("Unit must be 'minutes', 'hours', or 'seconds'")
+    
+    df = df.set_index(data_index).resample(f'{n}{time_units[unit]}').asfreq().reset_index()
+    
+    if interpolate_option == "linear":
+        df[data_value] = df[data_value].interpolate(method=interpolate_option)
+    elif interpolate_option == "None":
+        pass
+    elif interpolate_option == "mvAvg":
+        df[data_value] = df[data_value].fillna(df[data_value].rolling(window=dimension, min_periods=1).mean())
+    elif interpolate_option == "fFill":
+        df[data_value] = df[data_value].ffill()
+    elif interpolate_option == "bFill":
+        df[data_value] = df[data_value].bfill()
+    else:
+        df[data_value] = df[data_value].interpolate(method=interpolate_option, order=dimension)
     return df
 
 # Function to concatenate DataFrames based on a list of tags

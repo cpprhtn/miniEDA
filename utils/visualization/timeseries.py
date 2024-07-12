@@ -15,6 +15,7 @@ st.subheader('Select Data Target')
 data_index = st.selectbox("Select a column with time", df.columns)
 
 if st.checkbox("use selector"):
+    st.session_state["use_selector"] = True
     data_colum = st.selectbox("Select a Column with labels", df.columns)
     data_value = st.selectbox("Select a Column with value", df.columns)
 
@@ -64,6 +65,7 @@ if st.checkbox("use selector"):
         st.write("No data selected. too.")
 
 else:
+    st.session_state["use_selector"] = False
     data_y = st.multiselect(
     "Select data to use",
     df.columns,
@@ -77,3 +79,7 @@ else:
                 labels={data_index: 'Datetime'})
         fig.update_traces(connectgaps=False)
         st.plotly_chart(fig)
+        data_y.append(data_index)
+        save_df(df[data_y], "df1", st.session_state["LCSV"])
+        save_df(data_index, "data_index", False)
+        save_df(data_y, "data_value", False)
