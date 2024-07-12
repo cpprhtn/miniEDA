@@ -13,7 +13,7 @@ else:
 # Option to filter data based on a column value
 filter_column = st.selectbox('Select column to filter', df.columns)
 is_reg = st.checkbox("use regex?")
-filtered_df = None
+
 if is_reg:
         reg = st.text_input(f'Enter value to filter in column "{filter_column}"')
 else:
