@@ -20,6 +20,8 @@ def page_title():
             Page("utils/dataframe/modifycolumn.py", "Modify Column Names", "📚", in_section=True),
             Page("utils/dataframe/filterbycolumn.py", "Filter by Column", "📚", in_section=True),
             Page("utils/dataframe/pivotmelt.py", "Pivot and Melt", "📚", in_section=True),
+            Page("utils/dataframe/savecsv.py", "Save Dataframe", "📚", in_section=True),
+
             
             Section("Visualization", "💻"),
             Page("utils/visualization/timeseries.py", "Time Series", "📚", in_section=True),
@@ -103,6 +105,7 @@ def load_df(label="df", type=bool):
     else:
         if label in st.session_state:
             return st.session_state[label]
+        
 
 footer_html = """
 <style>
