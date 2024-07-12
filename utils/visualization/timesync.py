@@ -43,6 +43,7 @@ else:
             st.write(i)
             if st.session_state["LCSV"]:
                 st.dataframe(df_filled.head())
+                st.write(f"row: {df_filled.shape[0]}, col: {df_filled.shape[1]}")
             else:
                 st.dataframe(df_filled)
             missing_cnt[i] = df_filled.isna().sum()[data_value]

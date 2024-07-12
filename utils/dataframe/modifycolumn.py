@@ -14,5 +14,6 @@ if st.button('Rename Columns'):
     df.rename(columns=new_columns, inplace=True)
     st.write('Updated DataFrame with new column names:')
     st.write(df.head())
+    st.write(f"row: {df.shape[0]}, col: {df.shape[1]}")
 
 save_df(df, "df", st.session_state["LCSV"])

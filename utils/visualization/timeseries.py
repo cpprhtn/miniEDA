@@ -45,6 +45,7 @@ if st.checkbox("use selector"):
         st.write("Merged Data")
         if st.session_state["LCSV"]:
             st.dataframe(marged_df.head())
+            st.write(f"row: {marged_df.shape[0]}, col: {marged_df.shape[1]}")
         else:
             st.dataframe(marged_df)
         fig = px.line(marged_df, 

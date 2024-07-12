@@ -38,6 +38,7 @@ if large_csv:
             df.index = df.iloc[:, 0]
             df.drop([df.columns[0]], axis=1, inplace=True)
         st.write(df.head())
+        st.write(f"row: {df.shape[0]}, col: {df.shape[1]}")
     
    
     
@@ -46,6 +47,7 @@ if large_csv:
             try:
                 df = pd.read_csv(uploaded_file, header=read_csv_header, index_col=read_csv_index, low_memory=False)
                 st.write(df.head())
+                st.write(f"row: {df.shape[0]}, col: {df.shape[1]}")
                 save_df(df, "df", st.session_state["LCSV"])
             except FileNotFoundError:
                 st.error('FileNotFoundError: Specified file not found') 
@@ -57,6 +59,7 @@ if large_csv:
             except UnicodeDecodeError:
                 df = pd.read_csv(uploaded_file, header=read_csv_header, index_col=read_csv_index, encoding="CP949", low_memory=False)
                 st.write(df.head())
+                st.write(f"row: {df.shape[0]}, col: {df.shape[1]}")
                 save_df(df, "df", st.session_state["LCSV"])
             
 else:
@@ -72,5 +75,6 @@ else:
             df = df.transpose()
         st.subheader('DataFrame Header')
         st.dataframe(df.head())
+        st.write(f"row: {df.shape[0]}, col: {df.shape[1]}")
 
         save_df(df, "df", st.session_state["LCSV"])
