@@ -12,6 +12,7 @@ else:
         st.write(f"row: {df.shape[0]}, col: {df.shape[1]}")
     else:
         st.dataframe(df)
+        st.write(f"row: {df.shape[0]}, col: {df.shape[1]}")
 
     st.write("Number of missing values")
     info = pd.concat([df.isna().sum(), df.dtypes], axis=1)
