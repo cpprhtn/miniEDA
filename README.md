@@ -1,5 +1,8 @@
 # miniEDA
 
+## Preparing for Change (Streamlit -> FastAPI / Flask)
+In order to support big data, large-scale files were processed by supporting parquet in streamlit as a temporary measure, but we are preparing to migrate to FastAPI or Flask because we clearly feel the limitations of streamlit's single thread or session communication.
+
 ### README
 1. Basically, the data is only converted and shown internally using the session of streamlit. The uploaded original data will not be transformed. (including apply button)
 
