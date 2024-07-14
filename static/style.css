@@ -1,0 +1,99 @@
+body {
+    background-color: #1E1E1E;
+    color: white;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.sidebar {
+    background-color: #2E2E2E;
+    padding: 20px;
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow-y: auto;
+}
+
+.main-content {
+    flex: 1;
+    max-width: 1000px;
+    padding: 40px;
+    background-color: #333;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.logo {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    display: block;
+    text-align: center;
+    color: #FFD700;
+    text-decoration: none;
+}
+
+.menu-item {
+    margin: 20px 0;
+    font-size: 18px;
+}
+
+.menu-item:hover {
+    cursor: pointer;
+    color: #FFD700;
+}
+
+.upload-section {
+    background-color: #444;
+    padding: 30px;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 40px;
+}
+
+a {
+    color: #FFD700;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.dataframe {
+    background-color: #2E2E2E;
+    padding: 20px;
+    margin-top: 40px;
+    border-radius: 8px;
+    overflow: auto;
+}
+
+.dataframe table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dataframe th, .dataframe td {
+    border: 1px solid #444;
+    padding: 12px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.dataframe th {
+    background-color: #444;
+    color: #FFD700;
+    font-weight: bold;
+}
+
+/* Media query for small screens */
+@media (max-width: 1600px) {
+    .main-content {
+        margin-left: 300px; /* Add 20px margin on the left */
+    }
+}

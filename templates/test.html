@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Preview</title>
+    <style>
+        body {
+            background-color: #1E1E1E;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0; /* Reset default margin */
+            padding: 0; /* Reset default padding */
+            display: flex; /* Use flexbox for layout */
+            justify-content: center; /* Center align main content horizontally */
+        }
+
+        .sidebar {
+            background-color: #2E2E2E;
+            padding: 20px;
+            width: 250px; /* Fixed width for sidebar */
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto; /* Allow scrolling if content exceeds height */
+        }
+
+        .main-content {
+            flex: 1; /* Take remaining space */
+            max-width: 1000px; /* Increased maximum width for content */
+            margin: 20px;
+            padding: 40px;
+            background-color: #333; /* Darker background color for main content */
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3); /* Enhanced box shadow for depth */
+        }
+
+        .logo {
+            font-size: 32px; /* Larger font size for the logo */
+            font-weight: bold;
+            margin-bottom: 20px; /* Spacing below the logo */
+            display: block; /* Ensure logo is block-level for padding */
+            text-align: center; /* Center align the logo text */
+            color: #FFD700; /* Gold color for the logo */
+            text-decoration: none; /* Remove underline from logo */
+        }
+
+        .menu-item {
+            margin: 20px 0; /* Increased margin for menu items */
+            font-size: 18px; /* Slightly larger font size for menu items */
+        }
+
+        .menu-item:hover {
+            cursor: pointer;
+            color: #FFD700;
+        }
+
+        .upload-section {
+            background-color: #444; /* Darker background color for upload section */
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 40px; /* Increased margin from the top */
+        }
+
+        a {
+            color: #FFD700; /* Gold color for links */
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .dataframe {
+            background-color: #2E2E2E;
+            padding: 20px;
+            margin-top: 40px; /* Increased margin from the top */
+            border-radius: 8px;
+            overflow: auto;
+        }
+
+        .dataframe table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .dataframe th, .dataframe td {
+            border: 1px solid #444;
+            padding: 12px; /* Increased padding for table cells */
+            text-align: left;
+            font-size: 14px; /* Smaller font size for table content */
+        }
+
+        .dataframe th {
+            background-color: #444;
+            color: #FFD700; /* Gold color for table headers */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="/" class="logo">★ miniEDA</a>
+        <div class="menu-item">Menu Item 1</div>
+        <div class="menu-item">Menu Item 2</div>
+        <div class="menu-item">Menu Item 3</div>
+        <!-- Add more menu items as needed -->
+    </div>
+    <div class="main-content">
+        <h1>Data Preview</h1>
+        <h2>Head</h2>
+        <div class="dataframe">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Column 1</th>
+                        <th>Column 2</th>
+                        <th>Column 3</th>
+                        <!-- Add more columns as needed -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Data 1</td>
+                        <td>Data 2</td>
+                        <td>Data 3</td>
+                        <!-- Add more rows and data as needed -->
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

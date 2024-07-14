@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Preview</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script type="text/javascript" src="/static/script.js"></script>
+</head>
+<body>
+    {% include 'sidebar.html' %}
+    <div class="main-content">
+        <h1>Data Preview</h1>
+        <h2>Head</h2>
+        <div id="data-head">{{ head | safe }}</div>
+        <h2>Info</h2>
+        <div id="data-info"><pre>{{ info | safe }}</pre></div>
+        <h2>NaN Summary</h2>
+        <div id="data-isna"><pre>{{ isna | safe }}</pre></div>
+    </div>
+</body>
+</html>

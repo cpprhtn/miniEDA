@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unique Values</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script type="text/javascript" src="/static/script.js"></script>
+</head>
+<body>
+    {% include 'sidebar.html' %}
+    <div class="main-content">
+        <h1>Unique Values</h1>
+        <div id="unique-values"></div>
+        <br>
+        <form id="updateForm" action="/update_value" method="post">
+            <label for="column">Column:</label>
+            <select id="column" name="column"></select>
+            <label for="old_value">Old Value:</label>
+            <input type="text" id="old_value" name="old_value">
+            <label for="new_value">New Value:</label>
+            <input type="text" id="new_value" name="new_value">
+            <button type="submit">Update Value</button>
+        </form>
+        <form id="astypeForm" action="/astype_column" method="post">
+            <label for="astype_column">Column:</label>
+            <select id="astype_column" name="astype_column"></select>
+            <label for="new_dtype">New Data Type:</label>
+            <input type="text" id="new_dtype" name="new_dtype">
+            <button type="submit">Change Data Type</button>
+        </form>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", async function() {
+            let response = await fetch("/unique_values_data");
+            if (response.ok) {
+                let data = await response.json();
+                let uniqueValuesDiv = document.getElementById("unique-values");
+                let columnSelect = document.getElementById("column");
+                let astypeColumnSelect = document.getElementById("astype_column");
+
+                for (let col in data) {
+                    let colDiv = document.createElement("div");
+                    colDiv.innerHTML = `<strong>${col}</strong>: ${data[col].join(", ")}`;
+                    uniqueValuesDiv.appendChild(colDiv);
+
+                    let option = document.createElement("option");
+                    option.value = col;
+                    option.text = col;
+                    columnSelect.appendChild(option);
+
+                    let astypeOption = document.createElement("option");
+                    astypeOption.value = col;
+                    astypeOption.text = col;
+                    astypeColumnSelect.appendChild(astypeOption);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

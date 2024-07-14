@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remove NaN</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script type="text/javascript" src="/static/script.js"></script>
+</head>
+<body>
+    {% include 'sidebar.html' %}
+    <div class="main-content">
+        <h1>Remove NaN</h1>
+        <form id="nanForm" action="/handle_nan" method="post">
+            <label for="method">Method:</label>
+            <select id="method" name="method" onchange="toggleMethodOptions()">
+                <option value="dropna">Drop NaN</option>
+                <option value="fillna">Fill NaN</option>
+            </select>
+            <div id="dropna-options" style="display: block;">
+                <label for="dropna-how">How:</label>
+                <select id="dropna-how" name="dropna-how">
+                    <option value="any">Any</option>
+                    <option value="all">All</option>
+                </select>
+            </div>
+            <div id="fillna-options" style="display: none;">
+                <label for="fillna-value">Fill Value:</label>
+                <input type="text" id="fillna-value" name="fillna-value" />
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="result"></div>
+    </div>
+    <script>
+        function toggleMethodOptions() {
+            const method = document.getElementById('method').value;
+            const dropnaOptions = document.getElementById('dropna-options');
+            const fillnaOptions = document.getElementById('fillna-options');
+            if (method === 'dropna') {
+                dropnaOptions.style.display = 'block';
+                fillnaOptions.style.display = 'none';
+            } else {
+                dropnaOptions.style.display = 'none';
+                fillnaOptions.style.display = 'block';
+            }
+        }
+
+        document.getElementById('nanForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            let formData = new FormData(event.target);
+            let response = await fetch("/handle_nan", {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                let result = await response.text();
+                document.getElementById("result").innerHTML = result;
+            } else {
+                let errorText = await response.text();
+                alert(`Failed to handle NaN: ${errorText}`);
+            }
+        });
+    </script>
+</body>
+</html>

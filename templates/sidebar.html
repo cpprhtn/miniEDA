@@ -1,0 +1,27 @@
+<div class="sidebar">
+    <a href="/" class="logo">★ miniEDA</a>
+    <div class="menu-item" onclick="toggleSubMenu('dataframeSubMenu')">DataFrame</div>
+    <div id="dataframeSubMenu" style="display:none; margin-left: 20px;">
+        <div class="menu-item"><a href="/data_preview">Data Preview</a></div>
+        <div class="menu-item"><a href="/remove_nan">Remove NaN</a></div>
+        <div class="menu-item"><a href="/unique_values">Checking Unique Values</a></div>
+        <div class="menu-item"><a href="/slice_data">Slice Data</a></div>
+        <div class="menu-item"><a href="/modify_column_names">Modify Column Names</a></div>
+        <div class="menu-item"><a href="/filter_by_column">Filter by Column</a></div>
+        <div class="menu-item"><a href="/pivot_and_melt">Pivot and Melt</a></div>
+        <div class="menu-item"><a href="/save_dataframe">Save Dataframe</a></div>
+    </div>
+    <div class="menu-item" onclick="toggleSubMenu('visualizationSubMenu')">Visualization</div>
+    <div id="visualizationSubMenu" style="display:none; margin-left: 20px;">
+        <div class="menu-item"><a href="/time_series">Time Series</a></div>
+        <div class="menu-item"><a href="/time_synchronization">Time Synchronization</a></div>
+        <div class="menu-item"><a href="/bar_plot">Bar Plot</a></div>
+        <div class="menu-item"><a href="/line_plot">Line Plot</a></div>
+        <div class="menu-item"><a href="/scatter_plot">Scatter Plot</a></div>
+        <div class="menu-item"><a href="/heatmaps">Heatmaps</a></div>
+    </div>
+    <div class="menu-item" onclick="toggleSubMenu('customSubMenu')">Custom</div>
+    <div id="customSubMenu" style="display:none; margin-left: 20px;">
+        <div class="menu-item"><a href="/custom">Custom</a></div>
+    </div>
+</div>
