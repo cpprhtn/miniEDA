@@ -1,0 +1,5 @@
+
+*.csv
+/cache
+*.DS_Store
+/model
