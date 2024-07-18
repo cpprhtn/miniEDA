@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Modify Column Names</h2>
+<form id="modify_columns_form" method="post" action="/modify_columns">
+    {% for col in columns %}
+        <label for="{{ col }}">New name for column "{{ col }}"</label>
+        <input type="text" id="{{ col }}" name="new_columns" value="{{ col }}"><br>
+    {% endfor %}
+    <button type="submit">Rename Columns</button>
+</form>
+{% endblock %}

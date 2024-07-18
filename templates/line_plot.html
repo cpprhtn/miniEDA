@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Line Plot</h1>
+    <form method="post">
+        <label for="data_x">X-axis:</label>
+        <select name="data_x" id="data_x">
+            {% for col in columns %}
+            <option value="{{ col }}">{{ col }}</option>
+            {% endfor %}
+        </select>
+        <label for="data_y">Y-axis:</label>
+        <select name="data_y" id="data_y">
+            {% for col in columns %}
+            <option value="{{ col }}">{{ col }}</option>
+            {% endfor %}
+        </select>
+        <label for="data_title">Title:</label>
+        <input type="text" name="data_title" id="data_title">
+        <button type="submit">Create Plot</button>
+    </form>
+    {% if plot %}
+    <div>
+        {{ plot | safe }}
+    </div>
+    {% endif %}
+{% endblock %}

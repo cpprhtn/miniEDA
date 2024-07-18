@@ -1,67 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remove NaN</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <script type="text/javascript" src="/static/script.js"></script>
-</head>
-<body>
-    {% include 'sidebar.html' %}
-    <div class="main-content">
-        <h1>Remove NaN</h1>
-        <form id="nanForm" action="/handle_nan" method="post">
-            <label for="method">Method:</label>
-            <select id="method" name="method" onchange="toggleMethodOptions()">
-                <option value="dropna">Drop NaN</option>
-                <option value="fillna">Fill NaN</option>
-            </select>
-            <div id="dropna-options" style="display: block;">
-                <label for="dropna-how">How:</label>
-                <select id="dropna-how" name="dropna-how">
-                    <option value="any">Any</option>
-                    <option value="all">All</option>
-                </select>
-            </div>
-            <div id="fillna-options" style="display: none;">
-                <label for="fillna-value">Fill Value:</label>
-                <input type="text" id="fillna-value" name="fillna-value" />
-            </div>
-            <button type="submit">Submit</button>
-        </form>
-        <div id="result"></div>
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Remove NaN Values</h1>
+<form action="/remove_nan" method="post">
+    <div class="radio-container">
+        <input type="radio" id="dropna" name="option" value="dropna">
+        <label for="dropna">Drop NaN</label><br>
     </div>
-    <script>
-        function toggleMethodOptions() {
-            const method = document.getElementById('method').value;
-            const dropnaOptions = document.getElementById('dropna-options');
-            const fillnaOptions = document.getElementById('fillna-options');
-            if (method === 'dropna') {
-                dropnaOptions.style.display = 'block';
-                fillnaOptions.style.display = 'none';
-            } else {
-                dropnaOptions.style.display = 'none';
-                fillnaOptions.style.display = 'block';
-            }
-        }
+    <div id="dropna_options" style="display:none;">
+        <label for="axis">Axis:</label>
+        <select name="axis" id="axis">
+            <option value="index">Index</option>
+            <option value="columns">Columns</option>
+        </select><br>
+        <label for="how">How:</label>
+        <select name="how" id="how">
+            <option value="any">Any</option>
+            <option value="all">All</option>
+        </select><br>
+    </div>
 
-        document.getElementById('nanForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            let formData = new FormData(event.target);
-            let response = await fetch("/handle_nan", {
-                method: "POST",
-                body: formData
-            });
+    <div class="radio-container">
+    <input type="radio" id="fillna" name="option" value="fillna">
+    <label for="fillna">Fill NaN</label><br>
+    </div>
+    <div id="fillna_options" style="display:none;">
+        <label for="value">Fill Value:</label>
+        <input type="text" id="value" name="value"><br>
+    </div>
+    
+    <button type="submit">Apply</button>
+</form>
 
-            if (response.ok) {
-                let result = await response.text();
-                document.getElementById("result").innerHTML = result;
-            } else {
-                let errorText = await response.text();
-                alert(`Failed to handle NaN: ${errorText}`);
-            }
-        });
-    </script>
-</body>
-</html>
+<script>
+document.getElementById('dropna').addEventListener('change', function () {
+    document.getElementById('dropna_options').style.display = this.checked ? 'block' : 'none';
+    document.getElementById('fillna_options').style.display = 'none';
+});
+
+document.getElementById('fillna').addEventListener('change', function () {
+    document.getElementById('fillna_options').style.display = this.checked ? 'block' : 'none';
+    document.getElementById('dropna_options').style.display = 'none';
+});
+</script>
+{% endblock %}

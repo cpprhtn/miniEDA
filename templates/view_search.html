@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>View and Search Data</h1>
+    <form method="post">
+        <label for="search_column">Column:</label>
+        <select name="search_column" id="search_column">
+            {% for col in columns %}
+            <option value="{{ col }}" {% if search_column == col %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+        </select>
+        <label for="search_value">Search:</label>
+        <input type="text" name="search_value" id="search_value" value="{{ search_value }}">
+        <button type="submit">Search</button>
+    </form>
+    {% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+    {% endif %}
+    <div>
+        {{ df_html | safe }}
+    </div>
+    <div>
+        <form method="get" action="">
+            <input type="hidden" name="search_column" value="{{ search_column }}">
+            <input type="hidden" name="search_value" value="{{ search_value }}">
+            {% if page > 1 %}
+            <button type="submit" name="page" value="{{ page - 1 }}">Previous</button>
+            {% endif %}
+            {% if page < total_pages %}
+            <button type="submit" name="page" value="{{ page + 1 }}">Next</button>
+            {% endif %}
+        </form>
+    </div>
+{% endblock %}

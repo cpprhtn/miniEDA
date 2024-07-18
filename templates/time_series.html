@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Time Series Processing</h1>
+<form method="post" action="/time_series">
+    <label for="n">Interval (n):</label>
+    <input type="number" id="n" name="n" required><br>
+    
+    <label for="unit">Time Unit:</label>
+    <select id="unit" name="unit" required>
+        <option value="minutes">Minutes</option>
+        <option value="hours">Hours</option>
+        <option value="seconds">Seconds</option>
+    </select><br>
+    
+    <label for="data_index">Timestamp Column:</label>
+    <select id="data_index" name="data_index" required>
+        {% for col in columns %}
+        <option value="{{ col }}">{{ col }}</option>
+        {% endfor %}
+    </select><br>
+    
+    <button type="submit">Process Time Series</button>
+</form>
+{% endblock %}

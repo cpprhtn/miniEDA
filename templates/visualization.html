@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Data Visualization</h2>
+<form action="/visualization" method="post">
+    <label for="data_x">Select X Axis Column:</label>
+    <select id="data_x" name="data_x">
+        {% for col in columns %}
+            <option value="{{ col }}">{{ col }}</option>
+        {% endfor %}
+    </select><br><br>
+    
+    <label for="data_y">Select Y Axis Column:</label>
+    <select id="data_y" name="data_y">
+        {% for col in columns %}
+            <option value="{{ col }}">{{ col }}</option>
+        {% endfor %}
+    </select><br><br>
+    
+    <label for="data_title">Chart Title:</label>
+    <input type="text" id="data_title" name="data_title" required><br><br>
+    
+    <button type="submit">Generate Chart</button>
+</form>
+
+{% if plot %}
+<div>{{ plot|safe }}</div>
+{% endif %}
+{% endblock %}

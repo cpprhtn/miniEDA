@@ -1,27 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>miniEDA</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <script type="text/javascript" src="/static/script.js"></script>
-</head>
-<body>
-    {% include 'sidebar.html' %}
-    <div class="main-content">
-        <div class="upload-section">
-            <img src="/static/data_overview.png" alt="Data Overview" width="400px">
-            <form onsubmit="uploadFile(event)">
-                <label><input type="checkbox" name="csv_header"> csv header</label>
-                <!-- <label><input type="checkbox" name="csv_index"> csv index</label>
-                <label><input type="checkbox" name="read_large_csv"> Read Large Scale CSV</label>
-                <label><input type="checkbox" name="transpose"> transpose?</label> -->
-                <input type="file" name="file">
-                <button type="submit">Upload</button>
-            </form>
-        </div>
-        <div id="dataframe-display" class="dataframe-display"></div>
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Upload CSV File</h1>
+<img src="/static/data_overview.png" alt="Data Overview" width="600px">
+<form action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" required><br>
+    <div class="checkbox-container">
+        <input type="checkbox" id="csv_header" name="csv_header" value="true">
+        <label for="csv_header">CSV header</label>
+        <input type="checkbox" id="csv_index" name="csv_index" value="true">
+        <label for="csv_index">CSV index</label>
     </div>
-</body>
-</html>
+    <button type="submit">Upload</button>
+</form>
+{% endblock %}

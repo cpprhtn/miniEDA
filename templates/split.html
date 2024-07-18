@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Data Splitting</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="/">Upload CSV</a>
+        <a href="/data_preview">Data Preview</a>
+        <a href="/modify_columns">Rename Columns</a>
+        <a href="/slice">Slice Dataframe</a>
+        <a href="/remove_nan">Remove NaN</a>
+        <a href="/unique_values">Unique Values</a>
+        <a href="/astype">Change Data Type</a>
+        <a href="/time_series">Time Series</a>
+        <a href="/split">Split Dataframe</a>
+        <a href="/visualization">Visualization</a>
+        <a href="/export_csv" target="_blank">Export CSV</a>
+    </div>
+    <div class="content">
+        <h2>Data Splitting</h2>
+        <form id="split-form" action="/split" method="post">
+            <label for="column">Select Column:</label>
+            <select id="column" name="column" required>
+                <option value="">Select Column</option>
+                {% for col in columns %}
+                <option value="{{ col }}">{{ col }}</option>
+                {% endfor %}
+            </select><br><br>
+            
+            <label for="value">Select Value:</label>
+            <select id="value" name="value">
+                <option value="">Select Column First</option>
+            </select><br><br>
+            
+            <button type="submit">Filter Data</button>
+        </form>
+        
+        {% if filtered_df %}
+        <h3>Filtered Data</h3>
+        <div>{{ filtered_df|safe }}</div>
+        {% endif %}
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#column').change(function() {
+                var selectedColumn = $(this).val();
+                if (selectedColumn) {
+                    $.ajax({
+                        url: '/get_unique_values/' + selectedColumn,
+                        method: 'GET',
+                        success: function(data) {
+                            var values = data.unique_values;
+                            var $valueSelect = $('#value');
+                            $valueSelect.empty();
+                            $valueSelect.append('<option value="">All</option>');
+                            values.forEach(function(val) {
+                                $valueSelect.append('<option value="' + val + '">' + val + '</option>');
+                            });
+                        },
+                        error: function() {
+                            alert('Failed to fetch unique values');
+                        }
+                    });
+                } else {
+                    $('#value').empty();
+                    $('#value').append('<option value="">Select Column First</option>');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

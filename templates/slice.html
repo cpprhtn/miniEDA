@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Data Slicing</h2>
+<form action="/slice" method="post">
+    <label for="start_idx">Start Index:</label>
+    <input type="number" id="start_idx" name="start_idx" value="{{ start_idx }}" required><br><br>
+    
+    <label for="end_idx">End Index:</label>
+    <input type="number" id="end_idx" name="end_idx" value="{{ end_idx }}" required><br><br>
+    
+    <button type="submit">Slice Data</button>
+</form>
+
+{% if error_message %}
+<p style="color: red;">{{ error_message }}</p>
+{% endif %}
+
+{% if sliced_df %}
+<h3>Sliced Data (Rows {{ start_idx }} to {{ end_idx }})</h3>
+<div>{{ sliced_df|safe }}</div>
+{% endif %}
+{% endblock %}

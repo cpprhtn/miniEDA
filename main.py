@@ -1,132 +1,424 @@
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, File, UploadFile, Form, Request, HTTPException, Query
+from fastapi.responses import HTMLResponse, Response, JSONResponse
 from fastapi.templating import Jinja2Templates
-import dask.dataframe as dd
-import os
-import io
+from fastapi.staticfiles import StaticFiles
+import plotly.express as px
+import pandas as pd
+import tempfile
 
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
 templates = Jinja2Templates(directory="templates")
 
-# Define df and file path globally
-df = None
-file_location = None
+data_frame = None
+ROWS_PER_PAGE = 50
 
 @app.get("/", response_class=HTMLResponse)
-async def get(request: Request):
+async def get_index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/data_preview", response_class=HTMLResponse)
-async def data_preview(request: Request):
-    global df
-    if df is not None:
-        head = df.head().to_html()
-        isna = df.isna().sum().compute().to_string()
-        buf = io.StringIO()
-        df.info(buf=buf)
-        info = buf.getvalue()
-    else:
-        head = "<p>No data available. Please upload a file first.</p>"
-        isna = ""
-        info = ""
+@app.get("/export_csv")
+async def export_csv(response: Response):
+    global data_frame
+    if data_frame is None:
+        raise HTTPException(status_code=404, detail="No data uploaded")
+    
+    try:
+        csv_data = data_frame.to_csv(index=False, encoding='utf-8').encode()
+        response.headers["Content-Disposition"] = "attachment; filename=data.csv"
+        response.headers["Content-Type"] = "text/csv"
+        return Response(content=csv_data, media_type="text/csv")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to export CSV: {str(e)}")
 
-    return templates.TemplateResponse("data_preview.html", {"request": request, "head": head, "isna": isna, "info": info})
+@app.post("/upload", response_class=HTMLResponse)
+async def upload_file(request: Request, file: UploadFile = File(...), csv_header: bool = Form(False),  csv_index: bool = Form(False)):
+    global data_frame
+    header = 0 if csv_header else None
+    index = 0 if csv_index else None
+    try:
+        data_frame = pd.read_csv(file.file, header=header, index_col=index, encoding='cp949', low_memory=False)
+    except:
+        data_frame = pd.read_csv(file.file, header=header, index_col=index, encoding='utf-8', low_memory=False)
+    return templates.TemplateResponse("data_preview.html", {
+        "request": request, 
+        "df_head": data_frame.head().to_html(classes='table table-striped'), 
+        "df_shape": data_frame.shape, 
+        "df_isna": data_frame.isna().sum().to_frame(name='NaN').to_html(classes='table table-striped'), 
+        "df_dtypes": data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
+    })
+
+@app.get("/data_preview", response_class=HTMLResponse)
+async def get_data_preview(request: Request):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
+    return templates.TemplateResponse("data_preview.html", {
+        "request": request, 
+        "df_head": data_frame.head().to_html(classes='table table-striped'), 
+        "df_shape": data_frame.shape, 
+        "df_isna": data_frame.isna().sum().to_frame(name='NaN').to_html(classes='table table-striped'), 
+        "df_dtypes": data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
+    })
 
 @app.get("/remove_nan", response_class=HTMLResponse)
-async def remove_nan(request: Request):
-    global df
-    if df is not None:
-        head = df.head().to_html()
-        isna = df.isna().sum().compute().to_string()
-    else:
-        head = "<p>No data available. Please upload a file first.</p>"
-        isna = ""
+async def get_remove_nan(request: Request):
+    return templates.TemplateResponse("remove_nan.html", {"request": request})
 
-    return templates.TemplateResponse("remove_nan.html", {"request": request, "head": head, "isna": isna})
+@app.post("/remove_nan", response_class=HTMLResponse)
+async def post_remove_nan(request: Request, option: str = Form(...), value: str = Form(None), axis: str = Form(None), how: str = Form(None)):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
+    
+    if option == 'dropna':
+        axis = axis if axis else 'index'
+        how = how if how else 'any'
+        data_frame = data_frame.dropna(axis=axis, how=how)
+    elif option == 'fillna':
+        fill_value = int(value) if value else 0
+        data_frame = data_frame.fillna(fill_value)
+    
+    return templates.TemplateResponse("data_preview.html", {
+        "request": request, 
+        "df_head": data_frame.head().to_html(classes='table table-striped'), 
+        "df_shape": data_frame.shape, 
+        "df_isna": data_frame.isna().sum().to_frame(name='NaN').to_html(classes='table table-striped'), 
+        "df_dtypes": data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
+    })
 
 @app.get("/unique_values", response_class=HTMLResponse)
-async def unique_values(request: Request):
-    return templates.TemplateResponse("unique_values.html", {"request": request})
+async def get_unique_values(request: Request):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
+    unique_values = {col: data_frame[col].unique().tolist() for col in data_frame.columns}
+    return templates.TemplateResponse("unique_values.html", {"request": request, "unique_values": unique_values, "columns": data_frame.columns})
 
-@app.get("/unique_values_data")
-async def unique_values_data():
-    global df
-    if df is None:
-        raise HTTPException(status_code=400, detail="No data available. Please upload a file first.")
-    
+@app.post("/unique_values", response_class=HTMLResponse)
+async def post_unique_values(request: Request, column: str = Form(...), old_value: str = Form(...), new_value: str = Form(...)):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
     try:
-        unique_values = {col: df[col].dropna().unique().compute().tolist() for col in df.columns}
-        return JSONResponse(content=unique_values)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@app.post("/update_value")
-async def update_value(column: str = Form(...), old_value: str = Form(...), new_value: str = Form(...)):
-    global df
-    if df is None:
-        raise HTTPException(status_code=400, detail="No data available. Please upload a file first.")
-    
-    try:
-        df[column] = df[column].map(lambda x: new_value if x == old_value else x)
-        return HTMLResponse(content=f"Updated value {old_value} to {new_value} in column {column}.", status_code=200)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@app.post("/astype_column")
-async def astype_column(column: str = Form(...), new_dtype: str = Form(...)):
-    global df
-    if df is None:
-        raise HTTPException(status_code=400, detail="No data available. Please upload a file first.")
-    
-    try:
-        df[column] = df[column].astype(new_dtype)
-        return HTMLResponse(content=f"Changed data type of column {column} to {new_dtype}.", status_code=200)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@app.post("/upload")
-async def upload(file: UploadFile = File(...), csv_header: bool = Form(False)):
-    global df, file_location
-    # Save the file
-    file_location = f"cache/{file.filename.rsplit('.', 1)[0]}.csv"
-    os.makedirs(os.path.dirname(file_location), exist_ok=True)
-    with open(file_location, "wb+") as file_object:
-        file_object.write(file.file.read())
-    
-    # Read the file into a Dask DataFrame
-    try:
-        df = dd.read_csv(file_location, header=0 if csv_header else None,
-                         na_values=['', 'NA', 'NaN'], keep_default_na=False)
-        head = df.head().to_html()
-        return HTMLResponse(content=head, status_code=200)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@app.post("/handle_nan", response_class=HTMLResponse)
-async def handle_nan(request: Request, method: str = Form(...), 
-                     dropna_how: str = Form(None), fillna_value: str = Form(None)):
-    global df
-    if df is None:
-        raise HTTPException(status_code=400, detail="No data available. Please upload a file first.")
-    
-    try:
-        if method == "dropna":
-            how = dropna_how if dropna_how else "any"
-            df = df.dropna(how=how)
-        elif method == "fillna":
-            fill_value = fillna_value if fillna_value else 0
-            df = df.fillna(fill_value)
-        else:
-            raise HTTPException(status_code=400, detail="Invalid method for handling NaN values.")
+        # Convert column name to integer if possible
+        try:
+            column_name = int(column)
+        except ValueError:
+            column_name = column
         
-        head = df.head().to_html()
-        return head
+        data_frame[column_name] = data_frame[column_name].replace(old_value, new_value)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        return f"Error: {str(e)}"
+    unique_values = {col: data_frame[col].unique().tolist() for col in data_frame.columns}
+    return templates.TemplateResponse("data_preview.html", {
+        "request": request, 
+        "df_head": data_frame.head().to_html(classes='table table-striped'), 
+        "df_shape": data_frame.shape, 
+        "df_isna": data_frame.isna().sum().to_frame(name='NaN').to_html(classes='table table-striped'), 
+        "df_dtypes": data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
+    })
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+@app.get("/astype", response_class=HTMLResponse)
+async def get_astype(request: Request):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
+    dtype_options = ['int', 'float', 'str', 'bool', 'category', 'datetime64']
+    return templates.TemplateResponse("astype.html", {"request": request, "columns": data_frame.columns, "dtype_options": dtype_options})
+
+@app.post("/astype", response_class=HTMLResponse)
+async def post_astype(request: Request, column: str = Form(...), dtype: str = Form(...)):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
+    try:
+        try:
+            column_name = int(column)
+        except ValueError:
+            column_name = column
+
+        data_frame[column_name] = data_frame[column_name].astype(dtype)
+    except Exception as e:
+        return f"Error: {str(e)}"
+    return templates.TemplateResponse("data_preview.html", {
+        "request": request, 
+        "df_head": data_frame.head().to_html(classes='table table-striped'), 
+        "df_shape": data_frame.shape, 
+        "df_isna": data_frame.isna().sum().to_frame(name='NaN').to_html(classes='table table-striped'), 
+        "df_dtypes": data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
+    })
+
+@app.get("/modify_columns", response_class=HTMLResponse)
+async def get_modify_columns(request: Request):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
+    return templates.TemplateResponse("modify_columns.html", {"request": request, "columns": data_frame.columns})
+
+@app.post("/modify_columns", response_class=HTMLResponse)
+async def post_modify_columns(request: Request, new_columns: list[str] = Form(...)):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
+    try:
+        new_columns_dict = dict(zip(data_frame.columns, new_columns))
+        data_frame.rename(columns=new_columns_dict, inplace=True)
+    except Exception as e:
+        return templates.TemplateResponse("modify_columns.html", {"request": request, "columns": data_frame.columns, "error_message": str(e)})
+    
+    return templates.TemplateResponse("data_preview.html", {
+        "request": request, 
+        "df_head": data_frame.head().to_html(classes='table table-striped'), 
+        "df_shape": data_frame.shape, 
+        "df_isna": data_frame.isna().sum().to_frame(name='NaN').to_html(classes='table table-striped'), 
+        "df_dtypes": data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
+    })
+    
+@app.get("/time_series", response_class=HTMLResponse)
+async def get_time_series(request: Request):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
+    return templates.TemplateResponse("time_series.html", {"request": request, "columns": data_frame.columns})
+
+@app.post("/time_series", response_class=HTMLResponse)
+async def post_time_series(request: Request, n: int = Form(...), unit: str = Form(...), data_index: str = Form(...)):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
+
+    try:
+        data_frame = fill_missing_times(data_frame, n, unit, data_index)
+    except Exception as e:
+        return templates.TemplateResponse("time_series.html", {"request": request, "columns": data_frame.columns, "error_message": str(e)})
+    
+    return templates.TemplateResponse("data_preview.html", {
+        "request": request, 
+        "df_head": data_frame.head().to_html(classes='table table-striped'), 
+        "df_shape": data_frame.shape, 
+        "df_isna": data_frame.isna().sum().to_frame(name='NaN').to_html(classes='table table-striped'), 
+        "df_dtypes": data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
+    })
+
+def fill_missing_times(df, n, unit='minutes', data_index='timestamp'):
+    df = df.copy()
+    df.loc[:, data_index] = pd.to_datetime(df[data_index])
+
+    time_units = {
+        'minutes': 'min',
+        'hours': 'H',
+        'seconds': 'S'
+    }
+    
+    if unit not in time_units:
+        raise ValueError("Unit must be 'minutes', 'hours', or 'seconds'")
+    # try:
+    # df = df[~df.index.duplicated(keep='first')]
+    df = df.set_index(data_index).resample(f'{n}{time_units[unit]}').asfreq().reset_index()
+    return df
+    # except Exception as e:
+    #     return templates.TemplateResponse({"error_message": str(e)})
+    
+@app.get("/visualization", response_class=HTMLResponse)
+async def get_visualization(request: Request):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
+    return templates.TemplateResponse("visualization.html", {"request": request, "columns": data_frame.columns})
+
+@app.post("/visualization", response_class=HTMLResponse)
+async def post_visualization(request: Request, data_x: str = Form(...), data_y: str = Form(...), data_title: str = Form(...)):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
+    
+    try:
+        fig = px.bar(data_frame, x=data_x, y=data_y, title=data_title)
+        fig_html = fig.to_html(full_html=False)
+    except Exception as e:
+        return templates.TemplateResponse("visualization.html", {"request": request, "error_message": str(e), "columns": data_frame.columns})
+    
+    return templates.TemplateResponse("visualization.html", {"request": request, "plot": fig_html, "columns": data_frame.columns})
+
+@app.get("/slice", response_class=HTMLResponse)
+async def get_slice(request: Request):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
+    return templates.TemplateResponse("slice.html", {
+        "request": request, 
+        "start_idx": 0,
+        "end_idx": data_frame.shape[0] - 1, 
+        "columns": data_frame.columns
+    })
+
+@app.post("/slice", response_class=HTMLResponse)
+async def post_slice(request: Request, start_idx: int = Form(...), end_idx: int = Form(...)):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
+    
+    try:
+        sliced_df = data_frame.iloc[start_idx:end_idx+1] 
+    except Exception as e:
+        return templates.TemplateResponse("slice.html", {"request": request, "error_message": str(e), "start_idx": start_idx, "end_idx": end_idx, "columns": data_frame.columns})
+    
+    return templates.TemplateResponse("slice.html", {
+        "request": request, 
+        "sliced_df": sliced_df.to_html(classes='table table-striped'), 
+        "start_idx": start_idx, 
+        "end_idx": end_idx, 
+        "columns": data_frame.columns
+    })
+    
+@app.get("/split", response_class=HTMLResponse)
+async def get_split(request: Request):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
+    
+    columns = data_frame.columns
+    return templates.TemplateResponse("split.html", {
+        "request": request,
+        "columns": columns
+    })
+
+@app.post("/split", response_class=HTMLResponse)
+async def post_split(request: Request, column: str = Form(...), value: str = Form(None)):
+    global data_frame
+    if data_frame is None:
+        return "No data uploaded"
+    
+    filtered_df = data_frame.copy()
+    
+    if value:
+        filtered_df = filtered_df[filtered_df[column] == value]
+    
+    return templates.TemplateResponse("split.html", {
+        "request": request,
+        "columns": data_frame.columns,
+        "filtered_df": filtered_df.to_html(classes='table table-striped'),
+        "selected_column": column,
+        "selected_value": value
+    })
+
+@app.get("/get_unique_values/{column}", response_class=JSONResponse)
+async def get_unique_values(column: str):
+    global data_frame
+    if data_frame is None:
+        return JSONResponse(content={"error": "No data uploaded"}, status_code=400)
+    
+    unique_values = data_frame[column].unique().tolist()
+    return JSONResponse(content={"unique_values": unique_values})
+
+@app.get("/bar_plot", response_class=HTMLResponse)
+async def get_bar_plot(request: Request):
+    global data_frame
+    if data_frame is None:
+        raise HTTPException(status_code=404, detail="No data uploaded")
+    return templates.TemplateResponse("bar_plot.html", {"request": request, "columns": data_frame.columns})
+
+@app.post("/bar_plot", response_class=HTMLResponse)
+async def post_bar_plot(request: Request, data_x: str = Form(...), data_y: str = Form(...), data_title: str = Form(...)):
+    global data_frame
+    if data_frame is None:
+        raise HTTPException(status_code=404, detail="No data uploaded")
+    try:
+        fig = px.bar(data_frame, x=data_x, y=data_y, title=data_title)
+        fig_html = fig.to_html(full_html=False)
+    except Exception as e:
+        return templates.TemplateResponse("bar_plot.html", {"request": request, "error_message": str(e), "columns": data_frame.columns})
+    return templates.TemplateResponse("bar_plot.html", {"request": request, "plot": fig_html, "columns": data_frame.columns})
+
+@app.get("/line_plot", response_class=HTMLResponse)
+async def get_line_plot(request: Request):
+    global data_frame
+    if data_frame is None:
+        raise HTTPException(status_code=404, detail="No data uploaded")
+    return templates.TemplateResponse("line_plot.html", {"request": request, "columns": data_frame.columns})
+
+@app.post("/line_plot", response_class=HTMLResponse)
+async def post_line_plot(request: Request, data_x: str = Form(...), data_y: str = Form(...), data_title: str = Form(...)):
+    global data_frame
+    if data_frame is None:
+        raise HTTPException(status_code=404, detail="No data uploaded")
+    try:
+        fig = px.line(data_frame, x=data_x, y=data_y, title=data_title)
+        fig_html = fig.to_html(full_html=False)
+    except Exception as e:
+        return templates.TemplateResponse("line_plot.html", {"request": request, "error_message": str(e), "columns": data_frame.columns})
+    return templates.TemplateResponse("line_plot.html", {"request": request, "plot": fig_html, "columns": data_frame.columns})
+
+@app.get("/scatter_plot", response_class=HTMLResponse)
+async def get_scatter_plot(request: Request):
+    global data_frame
+    if data_frame is None:
+        raise HTTPException(status_code=404, detail="No data uploaded")
+    return templates.TemplateResponse("scatter_plot.html", {"request": request, "columns": data_frame.columns})
+
+@app.post("/scatter_plot", response_class=HTMLResponse)
+async def post_scatter_plot(request: Request, data_x: str = Form(...), data_y: str = Form(...), data_title: str = Form(...)):
+    global data_frame
+    if data_frame is None:
+        raise HTTPException(status_code=404, detail="No data uploaded")
+    try:
+        fig = px.scatter(data_frame, x=data_x, y=data_y, title=data_title)
+        fig_html = fig.to_html(full_html=False)
+    except Exception as e:
+        return templates.TemplateResponse("scatter_plot.html", {"request": request, "error_message": str(e), "columns": data_frame.columns})
+    return templates.TemplateResponse("scatter_plot.html", {"request": request, "plot": fig_html, "columns": data_frame.columns})
+
+@app.get("/view_search", response_class=HTMLResponse)
+async def get_view_search(request: Request, page: int = Query(1, ge=1)):
+    global data_frame
+    if data_frame is None:
+        raise HTTPException(status_code=404, detail="No data uploaded")
+    
+    total_pages = (len(data_frame) + ROWS_PER_PAGE - 1) // ROWS_PER_PAGE
+    start_idx = (page - 1) * ROWS_PER_PAGE
+    end_idx = start_idx + ROWS_PER_PAGE
+    paginated_df = data_frame[start_idx:end_idx]
+    
+    return templates.TemplateResponse("view_search.html", {
+        "request": request,
+        "columns": data_frame.columns,
+        "df_html": paginated_df.to_html(classes='table table-striped'),
+        "page": page,
+        "total_pages": total_pages
+    })
+
+@app.post("/view_search", response_class=HTMLResponse)
+async def post_view_search(request: Request, search_column: str = Form(...), search_value: str = Form(...), page: int = Query(1, ge=1)):
+    global data_frame
+    if data_frame is None:
+        raise HTTPException(status_code=404, detail="No data uploaded")
+    
+    try:
+        filtered_df = data_frame[data_frame[search_column].astype(str).str.contains(search_value, na=False)]
+        total_pages = (len(filtered_df) + ROWS_PER_PAGE - 1) // ROWS_PER_PAGE
+        start_idx = (page - 1) * ROWS_PER_PAGE
+        end_idx = start_idx + ROWS_PER_PAGE
+        paginated_df = filtered_df[start_idx:end_idx]
+        
+        return templates.TemplateResponse("view_search.html", {
+            "request": request,
+            "columns": data_frame.columns,
+            "df_html": paginated_df.to_html(classes='table table-striped'),
+            "search_column": search_column,
+            "search_value": search_value,
+            "page": page,
+            "total_pages": total_pages
+        })
+    except Exception as e:
+        return templates.TemplateResponse("view_search.html", {
+            "request": request,
+            "columns": data_frame.columns,
+            "df_html": data_frame.to_html(classes='table table-striped'),
+            "error_message": str(e),
+            "page": page,
+            "total_pages": total_pages
+        })

@@ -1,0 +1,10 @@
+# test env: py39 miniconda+conda-forge
+pandas
+numpy
+matplotlib
+st_pages
+dask[dataframe]
+plotly
+scipy
+fastapi
+uvicorn[standard]

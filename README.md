@@ -6,3 +6,9 @@ In order to support big data, large-scale files were processed by supporting par
 
 **If the data is less than 200MB or up to 1GB, it's also pleasant in the Streamlight version. It can be installed and built in the [Streamlight branch](https://github.com/cpprhtn/miniEDA/tree/streamlit)**
 
+
+
+## run
+```
+uvicorn main:app --reload
+```

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Process Missing Times</title>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="/">Upload CSV</a>
+        <a href="/data_preview">Data Preview</a>
+        <a href="/remove_nan">Remove NaN</a>
+        <a href="/unique_values">Unique Values</a>
+        <a href="/astype">Change Data Type</a>
+    </div>
+    <div class="content">
+        <h2>Fill Missing Times</h2>
+        <form action="/process_missing_times" method="post">
+            <label for="tag_column">Select Tag Column:</label>
+            <select id="tag_column" name="tag_column">
+                {% for col in columns %}
+                    <option value="{{ col }}">{{ col }}</option>
+                {% endfor %}
+            </select><br><br>
+            
+            <label for="selected_tag">Select Tag Value:</label>
+            <select id="selected_tag" name="selected_tag">
+                {% for tag in unique_tags %}
+                    <option value="{{ tag }}">{{ tag }}</option>
+                {% endfor %}
+            </select><br><br>
+            
+            <label for="n">Interval (n):</label>
+            <input type="number" id="n" name="n" min="1" required><br><br>
+            
+            <label for="unit">Time Unit:</label>
+            <select id="unit" name="unit">
+                <option value="minutes">Minutes</option>
+                <option value="hours">Hours</option>
+                <option value="seconds">Seconds</option>
+            </select><br><br>
+            
+            <button type="submit">Fill Missing Times</button>
+        </form>
+        
+        {% if error_message %}
+        <script>
+            alert("{{ error_message }}");
+        </script>
+        {% endif %}
+    </div>
+</body>
+</html>
