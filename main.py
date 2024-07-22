@@ -2,9 +2,12 @@ from fastapi import FastAPI, File, UploadFile, Form, Request, HTTPException, Que
 from fastapi.responses import HTMLResponse, Response, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+import dask.dataframe as dd
 import plotly.express as px
 import pandas as pd
-import tempfile
+import psutil
+import os
+from utils import load_and_process_dataset, fill_missing_times
 
 app = FastAPI()
 
@@ -14,6 +17,13 @@ templates = Jinja2Templates(directory="templates")
 
 data_frame = None
 ROWS_PER_PAGE = 50
+file_size = 0
+system_memory = psutil.virtual_memory().total
+partition_size = system_memory // 4
+min_partition_size = 100 * 1024 ** 2 # 100MB
+max_partition_size = 500 * 1024 ** 2 # 500MB
+partition_size = max(min_partition_size, min(partition_size, max_partition_size))
+npartitions = 1
 
 @app.get("/", response_class=HTMLResponse)
 async def get_index(request: Request):
@@ -26,7 +36,7 @@ async def export_csv(response: Response):
         raise HTTPException(status_code=404, detail="No data uploaded")
     
     try:
-        csv_data = data_frame.to_csv(index=False, encoding='utf-8').encode()
+        csv_data = data_frame.to_csv("export.csv", index=False, single_file=True)
         response.headers["Content-Disposition"] = "attachment; filename=data.csv"
         response.headers["Content-Type"] = "text/csv"
         return Response(content=csv_data, media_type="text/csv")
@@ -38,15 +48,19 @@ async def upload_file(request: Request, file: UploadFile = File(...), csv_header
     global data_frame
     header = 0 if csv_header else None
     index = 0 if csv_index else None
-    try:
-        data_frame = pd.read_csv(file.file, header=header, index_col=index, encoding='cp949', low_memory=False)
-    except:
-        data_frame = pd.read_csv(file.file, header=header, index_col=index, encoding='utf-8', low_memory=False)
+    global file_size, npartitions
+    file_size = os.path.getsize(file.filename)
+    npartitions = max(1, file_size // partition_size)
+    # try:
+    #     data_frame = pd.read_csv(file.file, header=header, index_col=index, encoding='cp949', low_memory=False)
+    # except:
+    #     data_frame = pd.read_csv(file.file, header=header, index_col=index, encoding='utf-8', low_memory=False)
+    data_frame = load_and_process_dataset(file.filename, save_parquet=True)
     return templates.TemplateResponse("data_preview.html", {
         "request": request, 
         "df_head": data_frame.head().to_html(classes='table table-striped'), 
         "df_shape": data_frame.shape, 
-        "df_isna": data_frame.isna().sum().to_frame(name='NaN').to_html(classes='table table-striped'), 
+        "df_isna": data_frame.isna().sum().compute().to_frame(name='NaN').to_html(classes='table table-striped'), 
         "df_dtypes": data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
     })
 
@@ -59,7 +73,7 @@ async def get_data_preview(request: Request):
         "request": request, 
         "df_head": data_frame.head().to_html(classes='table table-striped'), 
         "df_shape": data_frame.shape, 
-        "df_isna": data_frame.isna().sum().to_frame(name='NaN').to_html(classes='table table-striped'), 
+        "df_isna": data_frame.isna().sum().compute().to_frame(name='NaN').to_html(classes='table table-striped'), 
         "df_dtypes": data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
     })
 
@@ -85,7 +99,7 @@ async def post_remove_nan(request: Request, option: str = Form(...), value: str 
         "request": request, 
         "df_head": data_frame.head().to_html(classes='table table-striped'), 
         "df_shape": data_frame.shape, 
-        "df_isna": data_frame.isna().sum().to_frame(name='NaN').to_html(classes='table table-striped'), 
+        "df_isna": data_frame.isna().sum().compute().to_frame(name='NaN').to_html(classes='table table-striped'), 
         "df_dtypes": data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
     })
 
@@ -94,7 +108,7 @@ async def get_unique_values(request: Request):
     global data_frame
     if data_frame is None:
         return "No data uploaded"
-    unique_values = {col: data_frame[col].unique().tolist() for col in data_frame.columns}
+    unique_values = {col: data_frame[col].unique().compute().tolist() for col in data_frame.columns}
     return templates.TemplateResponse("unique_values.html", {"request": request, "unique_values": unique_values, "columns": data_frame.columns})
 
 @app.post("/unique_values", response_class=HTMLResponse)
@@ -117,7 +131,7 @@ async def post_unique_values(request: Request, column: str = Form(...), old_valu
         "request": request, 
         "df_head": data_frame.head().to_html(classes='table table-striped'), 
         "df_shape": data_frame.shape, 
-        "df_isna": data_frame.isna().sum().to_frame(name='NaN').to_html(classes='table table-striped'), 
+        "df_isna": data_frame.isna().sum().compute().to_frame(name='NaN').to_html(classes='table table-striped'), 
         "df_dtypes": data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
     })
 
@@ -127,7 +141,7 @@ async def get_astype(request: Request):
     global data_frame
     if data_frame is None:
         return "No data uploaded"
-    dtype_options = ['int', 'float', 'str', 'bool', 'category', 'datetime64']
+    dtype_options = ['int', 'float', 'str', 'bool', 'category', 'datetime64[ns]']
     return templates.TemplateResponse("astype.html", {"request": request, "columns": data_frame.columns, "dtype_options": dtype_options})
 
 @app.post("/astype", response_class=HTMLResponse)
@@ -148,7 +162,7 @@ async def post_astype(request: Request, column: str = Form(...), dtype: str = Fo
         "request": request, 
         "df_head": data_frame.head().to_html(classes='table table-striped'), 
         "df_shape": data_frame.shape, 
-        "df_isna": data_frame.isna().sum().to_frame(name='NaN').to_html(classes='table table-striped'), 
+        "df_isna": data_frame.isna().sum().compute().to_frame(name='NaN').to_html(classes='table table-striped'), 
         "df_dtypes": data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
     })
 
@@ -166,15 +180,15 @@ async def post_modify_columns(request: Request, new_columns: list[str] = Form(..
         return "No data uploaded"
     try:
         new_columns_dict = dict(zip(data_frame.columns, new_columns))
-        data_frame.rename(columns=new_columns_dict, inplace=True)
+        data_frame = data_frame.rename(columns=new_columns_dict)
     except Exception as e:
         return templates.TemplateResponse("modify_columns.html", {"request": request, "columns": data_frame.columns, "error_message": str(e)})
     
     return templates.TemplateResponse("data_preview.html", {
         "request": request, 
-        "df_head": data_frame.head().to_html(classes='table table-striped'), 
+        "df_head": data_frame.head().compute().to_html(classes='table table-striped'), 
         "df_shape": data_frame.shape, 
-        "df_isna": data_frame.isna().sum().to_frame(name='NaN').to_html(classes='table table-striped'), 
+        "df_isna": data_frame.isna().sum().compute().to_frame(name='NaN').to_html(classes='table table-striped'), 
         "df_dtypes": data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
     })
     
@@ -195,33 +209,15 @@ async def post_time_series(request: Request, n: int = Form(...), unit: str = For
         data_frame = fill_missing_times(data_frame, n, unit, data_index)
     except Exception as e:
         return templates.TemplateResponse("time_series.html", {"request": request, "columns": data_frame.columns, "error_message": str(e)})
-    
+
     return templates.TemplateResponse("data_preview.html", {
         "request": request, 
-        "df_head": data_frame.head().to_html(classes='table table-striped'), 
-        "df_shape": data_frame.shape, 
-        "df_isna": data_frame.isna().sum().to_frame(name='NaN').to_html(classes='table table-striped'), 
-        "df_dtypes": data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
+        "df_head": data_frame.head().compute().to_html(classes='table table-striped'), 
+        "df_shape": (data_frame.shape[0].compute(), len(data_frame.columns)), 
+        "df_isna": data_frame.isna().sum().compute().to_frame(name='NaN').to_html(classes='table table-striped'), 
+        "df_dtypes": data_frame.dtypes.to_frame(name='dtype').compute().to_html(classes='table table-striped')
     })
 
-def fill_missing_times(df, n, unit='minutes', data_index='timestamp'):
-    df = df.copy()
-    df.loc[:, data_index] = pd.to_datetime(df[data_index])
-
-    time_units = {
-        'minutes': 'min',
-        'hours': 'H',
-        'seconds': 'S'
-    }
-    
-    if unit not in time_units:
-        raise ValueError("Unit must be 'minutes', 'hours', or 'seconds'")
-    # try:
-    # df = df[~df.index.duplicated(keep='first')]
-    df = df.set_index(data_index).resample(f'{n}{time_units[unit]}').asfreq().reset_index()
-    return df
-    # except Exception as e:
-    #     return templates.TemplateResponse({"error_message": str(e)})
     
 @app.get("/visualization", response_class=HTMLResponse)
 async def get_visualization(request: Request):
@@ -252,7 +248,7 @@ async def get_slice(request: Request):
     return templates.TemplateResponse("slice.html", {
         "request": request, 
         "start_idx": 0,
-        "end_idx": data_frame.shape[0] - 1, 
+        "end_idx": data_frame.tail(1).index[0], 
         "columns": data_frame.columns
     })
 
@@ -263,17 +259,31 @@ async def post_slice(request: Request, start_idx: int = Form(...), end_idx: int 
         return "No data uploaded"
     
     try:
-        sliced_df = data_frame.iloc[start_idx:end_idx+1] 
-    except Exception as e:
-        return templates.TemplateResponse("slice.html", {"request": request, "error_message": str(e), "start_idx": start_idx, "end_idx": end_idx, "columns": data_frame.columns})
+        def slice_partition(partition):
+            partition = partition.sort_index()
+            return partition.loc[start_idx:end_idx]
+
+        sliced_partitions = data_frame.map_partitions(slice_partition)
+        sliced_df = sliced_partitions.compute()
+
+        sliced_html = sliced_df.to_html(classes='table table-striped')
+
+        return templates.TemplateResponse("slice.html", {
+            "request": request, 
+            "sliced_df": sliced_html, 
+            "start_idx": start_idx, 
+            "end_idx": end_idx, 
+            "columns": sliced_df.columns
+        })
     
-    return templates.TemplateResponse("slice.html", {
-        "request": request, 
-        "sliced_df": sliced_df.to_html(classes='table table-striped'), 
-        "start_idx": start_idx, 
-        "end_idx": end_idx, 
-        "columns": data_frame.columns
-    })
+    except Exception as e:
+        return templates.TemplateResponse("slice.html", {
+            "request": request, 
+            "error_message": str(e), 
+            "start_idx": start_idx, 
+            "end_idx": end_idx, 
+            "columns": data_frame.columns
+        })
     
 @app.get("/split", response_class=HTMLResponse)
 async def get_split(request: Request):
@@ -381,7 +391,12 @@ async def get_view_search(request: Request, page: int = Query(1, ge=1)):
     total_pages = (len(data_frame) + ROWS_PER_PAGE - 1) // ROWS_PER_PAGE
     start_idx = (page - 1) * ROWS_PER_PAGE
     end_idx = start_idx + ROWS_PER_PAGE
-    paginated_df = data_frame[start_idx:end_idx]
+    
+    def slice_partition(partition):
+        return partition.loc[start_idx:end_idx]
+    
+    # paginated_df = data_frame[start_idx:end_idx]
+    paginated_df = data_frame.map_partitions(slice_partition).compute()
     
     return templates.TemplateResponse("view_search.html", {
         "request": request,
@@ -402,7 +417,12 @@ async def post_view_search(request: Request, search_column: str = Form(...), sea
         total_pages = (len(filtered_df) + ROWS_PER_PAGE - 1) // ROWS_PER_PAGE
         start_idx = (page - 1) * ROWS_PER_PAGE
         end_idx = start_idx + ROWS_PER_PAGE
-        paginated_df = filtered_df[start_idx:end_idx]
+        
+        def slice_partition(partition):
+            return partition.loc[start_idx:end_idx]
+        
+        # paginated_df = filtered_df[start_idx:end_idx]
+        paginated_df = filtered_df.map_partitions(slice_partition).compute()
         
         return templates.TemplateResponse("view_search.html", {
             "request": request,
