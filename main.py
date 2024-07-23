@@ -7,7 +7,7 @@ import plotly.express as px
 import pandas as pd
 import psutil
 import os
-from utils import load_and_process_dataset, fill_missing_times
+from utils import load_and_process_dataset
 
 app = FastAPI()
 
@@ -186,7 +186,7 @@ async def post_modify_columns(request: Request, new_columns: list[str] = Form(..
     
     return templates.TemplateResponse("data_preview.html", {
         "request": request, 
-        "df_head": data_frame.head().compute().to_html(classes='table table-striped'), 
+        "df_head": data_frame.head().to_html(classes='table table-striped'), 
         "df_shape": data_frame.shape, 
         "df_isna": data_frame.isna().sum().compute().to_frame(name='NaN').to_html(classes='table table-striped'), 
         "df_dtypes": data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
@@ -208,16 +208,66 @@ async def post_time_series(request: Request, n: int = Form(...), unit: str = For
     try:
         data_frame = fill_missing_times(data_frame, n, unit, data_index)
     except Exception as e:
-        return templates.TemplateResponse("time_series.html", {"request": request, "columns": data_frame.columns, "error_message": str(e)})
+        return templates.TemplateResponse("time_series.html", {
+            "request": request,
+            "columns": data_frame.columns,
+            "error_message": str(e)
+        })
+
+    # `compute()`를 사용하여 결과를 출력합니다.
+    df_head = data_frame.head().to_html(classes='table table-striped')
+    df_shape = (data_frame.shape[0].compute(), len(data_frame.columns))
+    df_isna = data_frame.isna().sum().compute().to_frame(name='NaN').to_html(classes='table table-striped')
+    df_dtypes = data_frame.dtypes.to_frame(name='dtype').to_html(classes='table table-striped')
 
     return templates.TemplateResponse("data_preview.html", {
-        "request": request, 
-        "df_head": data_frame.head().compute().to_html(classes='table table-striped'), 
-        "df_shape": (data_frame.shape[0].compute(), len(data_frame.columns)), 
-        "df_isna": data_frame.isna().sum().compute().to_frame(name='NaN').to_html(classes='table table-striped'), 
-        "df_dtypes": data_frame.dtypes.to_frame(name='dtype').compute().to_html(classes='table table-striped')
+        "request": request,
+        "df_head": df_head,
+        "df_shape": df_shape,
+        "df_isna": df_isna,
+        "df_dtypes": df_dtypes
     })
 
+def fill_missing_times(df, n, unit='minutes', data_index='timestamp'):
+    df = df.copy()
+    df[data_index] = dd.to_datetime(df[data_index])
+    
+    time_units = {
+        'minutes': 'T',
+        'hours': 'H',
+        'seconds': 'S'
+    }
+    
+    if unit not in time_units:
+        raise ValueError("Unit must be 'minutes', 'hours', or 'seconds'")
+    
+    freq = f'{n}{time_units[unit]}'
+    
+    # 리샘플링을 위해 전체 시간 범위와 빈도 수를 계산
+    min_time = df[data_index].min().compute()
+    max_time = df[data_index].max().compute()
+    
+    # 전체 시간 범위를 생성하여 빈도수에 따라 리샘플링
+    df = df.set_index(data_index)
+    df = df.repartition(partition_size="1GB")
+    
+    # 중복 인덱스를 제거
+    def preprocess_partition(partition):
+        partition = partition.reset_index()
+        return partition.drop_duplicates(subset=[data_index]).set_index(data_index)
+    
+    df = df.map_partitions(preprocess_partition)
+    
+    # 파티션에서 resample 수행
+    def resample_partition(partition):
+        return partition.resample(freq).asfreq()
+    
+    df = df.map_partitions(resample_partition)
+    
+    # 데이터 프레임을 다시 결합
+    df = df.reset_index()
+    
+    return df
     
 @app.get("/visualization", response_class=HTMLResponse)
 async def get_visualization(request: Request):
