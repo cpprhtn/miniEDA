@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <title>Data Processing App</title>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="/">Upload File</a>
+        <a href="/data_preview">Data Preview</a>
+        <a href="/type_casting">Data Type Casting</a>
+        <a href="/fill_interpolation">Data Interpolation</a>
+        <a href="/export_csv" target="_blank">Export CSV</a>
+    </div>
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Optional: Bootstrap JS and other scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Global error handling script -->
+    <script>
+    // Check if error message exists and display it using alert
+    {% if error_message %}
+    alert("{{ error_message }}");
+    {% endif %}
+    </script>
+</body>
+</html>

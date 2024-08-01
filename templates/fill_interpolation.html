@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Fill Interpolation</h1>
+<form action="/fill_interpolation" method="post">
+    <label for="column">Select Column:</label>
+    <!-- 보간을 적용할 컬럼 선택. 전체 보간을 위한 "전체 선택" 옵션 추가 -->
+    <select id="column" name="column">
+        <option value="__all__">전체 선택</option>
+        {% for col in columns %}
+        <option value="{{ col }}">{{ col }}</option>
+        {% endfor %}
+    </select><br>
+    
+    <label for="fill_null">보간방법 선택:</label>
+    <select id="fill_null" name="fill_null">
+        {% for fill_null in fill_option %}
+        <option value="{{ fill_null }}">{{ fill_null }}</option>
+        {% endfor %}
+    </select><br>
+    
+    <button type="submit">Apply</button>
+</form>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Change Data Type</h1>
+<form action="/type_casting" method="post">
+    <label for="column">Select Column:</label>
+    <select id="column" name="column">
+        {% for col in columns %}
+        <option value="{{ col }}">{{ col }}</option>
+        {% endfor %}
+    </select><br>
+    <label for="dtype">Select Data Type:</label>
+    <select id="dtype" name="dtype">
+        {% for dtype in dtype_options %}
+        <option value="{{ dtype }}">{{ dtype }}</option>
+        {% endfor %}
+    </select><br>
+    <button type="submit">Apply</button>
+</form>
+{% endblock %}

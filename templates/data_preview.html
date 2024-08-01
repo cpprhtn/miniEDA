@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Data Preview</h1>
+
+<h2>Data Head</h2>
+<div>
+    {{ df_head | safe }}
+</div>
+
+<h2>Missing Values (NaN)</h2>
+<div>
+    {{ df_isna | safe }}
+</div>
+
+{% endblock %}
