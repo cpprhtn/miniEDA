@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Filter Data</h1>
+
+<form action="/filter_data" method="post">
+    <label for="condition">Filter Condition:</label>
+    <input type="text" id="condition" name="condition" placeholder="e.g., tag_id == 'BIO_FT_MAP.FT_2803.TOTAL' and val < 1" required><br>
+    <button type="submit">Apply Filter</button>
+</form>
+
+{% if df_head %}
+<h2>Filtered Data Head</h2>
+<div>
+    {{ df_head | safe }}
+</div>
+
+<h2>Missing Values (NaN) after Filter</h2>
+<div>
+    {{ df_isna | safe }}
+</div>
+{% endif %}
+
+{% if error_message %}
+<div class="error">
+    {{ error_message }}
+</div>
+{% endif %}
+
+{% endblock %}
