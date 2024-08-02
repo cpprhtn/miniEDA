@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block workflow %}
+{{ mermaid_diagram | safe }}
+{% endblock %}
 
 {% block content %}
 <h1>Upload File</h1>

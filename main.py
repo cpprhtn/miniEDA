@@ -24,8 +24,25 @@ data_frame: Optional[pl.DataFrame] = None
 
 @app.get("/", response_class=HTMLResponse)
 async def get_index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    data_frame = request.app.state.data_frame
+    if data_frame is None:
+         mermaid_diagram = """
+    graph TD;
+        A[Start] --> B[Process];
+        B --> C[End];
+    """
+    else:
+        mermaid_diagram = """
+    graph TD;
+        A[Start] --> B[Process];
+        B --> C[End];
+    """
 
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "mermaid_diagram": mermaid_diagram
+    })
+    
 @app.get("/data_preview", response_class=HTMLResponse)
 async def get_data_preview(request: Request):
     data_frame = request.app.state.data_frame
@@ -39,28 +56,17 @@ async def get_data_preview(request: Request):
         })
 
 @app.get("/fill_interpolation", response_class=HTMLResponse)
-async def fill_interpolation(request: Request):
+async def fill_interpolation_get(request: Request):
     data_frame = request.app.state.data_frame
     if data_frame is None:
         return "No data uploaded"
     
     fill_option = ['linear', 'forward', 'backward', 'min', 'max', 'mean', 'zero', 'one']
-    return templates.TemplateResponse("fill_interpolation.html", {"request": request, "columns": data_frame.columns, "fill_option": fill_option})
-
-@app.get("/export_csv")
-async def export_csv(response: Response):
-    data_frame = request.app.state.data_frame
-    if data_frame is None:
-        raise HTTPException(status_code=404, detail="No data uploaded")
-    
-    try:
-        csv_data = data_frame.write_csv("export.csv")
-        response.headers["Content-Disposition"] = "attachment; filename=data.csv"
-        response.headers["Content-Type"] = "text/csv"
-        return Response(content=csv_data, media_type="text/csv")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to export CSV: {str(e)}")
-
+    return templates.TemplateResponse("fill_interpolation.html", {
+        "request": request,
+        "columns": data_frame.columns,
+        "fill_option": fill_option
+    })
 
 @app.post("/upload", response_class=HTMLResponse)
 async def upload_file(request: Request, file: UploadFile = File(...), csv_header: bool = Form(False)):
@@ -81,7 +87,7 @@ async def upload_file(request: Request, file: UploadFile = File(...), csv_header
     })
 
 @app.post("/fill_interpolation", response_class=HTMLResponse)
-async def fill_interpolation_endpoint(
+async def fill_interpolation_post(
     request: Request,
     column: str = Form(...),
     fill_null: str = Form("linear")
@@ -91,14 +97,14 @@ async def fill_interpolation_endpoint(
         return "No data uploaded"
 
     try:
-        columns = []
         if column == "__all__":
-            columns = None  # 모든 컬럼을 대상으로 설정
+            columns = None
         else:
             columns = [column]
 
-        # fill_interpolation 함수를 사용하여 결측치 보간
         data_frame = fill_interpolation(data_frame, columns=columns, type=fill_null)
+        request.app.state.data_frame = data_frame
+
     except Exception as e:
         return templates.TemplateResponse("data_preview.html", {
             "request": request,
@@ -107,10 +113,9 @@ async def fill_interpolation_endpoint(
 
     return templates.TemplateResponse("data_preview.html", {
         "request": request,
-        "df_head": convert_html(data_frame),
+        "df_head": convert_html(data_frame.head()),
         "df_shape": data_frame.shape,
         "df_isna": convert_html(data_frame.null_count()),
-        "df_dtypes": convert_html(data_frame.schema)
     })
 
 @app.post("/rename_columns", response_class=HTMLResponse)
@@ -150,15 +155,13 @@ async def filter_data_endpoint(request: Request, condition: str = Form(...)):
         "df_head": convert_html(data_frame.head()),
         "df_shape": data_frame.shape,
         "df_isna": convert_html(data_frame.is_null().sum().to_frame().rename({'count': 'NaN'}, axis=1)),
-        "df_dtypes": convert_html(data_frame.dtypes.to_frame(name='dtype'))
     })
 
 @app.get("/export_csv")
-async def export_csv(response: Response):
+async def export_csv(response: Response, request: Request):
     data_frame = request.app.state.data_frame
     if data_frame is None:
         raise HTTPException(status_code=404, detail="No data uploaded")
-    
     try:
         csv_data = data_frame.write_csv()
         response.headers["Content-Disposition"] = "attachment; filename=data.csv"

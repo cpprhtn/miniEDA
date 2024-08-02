@@ -12,6 +12,8 @@ body {
     box-shadow: 2px 0 5px rgba(0,0,0,0.1);
     height: 100vh;
     position: fixed;
+    top: 0;
+    left: 0;
 }
 
 .sidebar a {
@@ -28,11 +30,26 @@ body {
     background-color: #495057;
 }
 
-.content {
-    margin-left: 220px;
+.main-content {
+    margin-left: 200px;
     padding: 20px;
-    flex-grow: 1;
-    padding-left: 60px;
+    width: calc(100% - 200px);
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+}
+
+.workflow {
+    flex: 2;
+    padding: 20px;
+    overflow: auto;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+    border-left : thick solid #ccc;
+    height : 100vh;
 }
 
 h1 {
