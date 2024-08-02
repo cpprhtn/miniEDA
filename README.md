@@ -16,7 +16,7 @@ In many data organizations, it is estimated that 30-40% of time is spent address
 
 ### Installation
 
-To install miniEDA, clone the repository and install the necessary dependencies:
+To install miniEDA, clone the repository and install the necessary dependencies. Python 3.11 or higher is recommended:
 
 ```sh
 git clone https://github.com/cpprhtn/miniEDA.git
