@@ -14,7 +14,11 @@ async def get_astype(request: Request):
         return "No data uploaded"
     
     dtype_options = ['int', 'float', 'str', 'bool', 'datetime']
-    return request.app.state.templates.TemplateResponse("type_casting.html", {"request": request, "columns": data_frame.columns, "dtype_options": dtype_options})
+    return request.app.state.templates.TemplateResponse("type_casting.html", {
+        "request": request, 
+        "columns": data_frame.columns, 
+        "dtype_options": dtype_options
+        })
 
 @casting.post("/type_casting", response_class=HTMLResponse, tags=['casting'])
 async def type_casting_endpoint(request: Request, column: str = Form(...), dtype: str = Form(...)):
@@ -32,7 +36,5 @@ async def type_casting_endpoint(request: Request, column: str = Form(...), dtype
     return request.app.state.templates.TemplateResponse("data_preview.html", {
         "request": request,
         "df_head": convert_html(data_frame),
-        # "df_shape": data_frame.shape,
         "df_isna": convert_html(data_frame.fill_nan(None).null_count()),
-        # "df_dtypes": convert_html(data_frame.dtypes.to_frame(name='dtype'))
     })
