@@ -4,6 +4,7 @@ const config: GatsbyConfig = {
   siteMetadata: {
     title: `mini-eda-frontend-generator`,
   },
+  pathPrefix: "/app",
   graphqlTypegen: true,
   plugins: [],
 };

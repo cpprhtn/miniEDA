@@ -1,14 +1,18 @@
 from fastapi import FastAPI, File, UploadFile, Form, Request, HTTPException
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, Response, FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+
 from routers.casting import casting
 from routers.interpolate import interpolate
 from routers.filtering import filtering
 from routers.rename_columns import rename_columns
-import polars as pl
+
 from typing import Optional
 from utils import read_file, convert_html
+
+import polars as pl
+import os
 
 app = FastAPI()
  
@@ -16,7 +20,9 @@ app.include_router(casting)
 app.include_router(interpolate)
 app.include_router(filtering)
 app.include_router(rename_columns)
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/app", StaticFiles(directory="frontend/public"), name="frontend-files")
 
 @app.on_event("startup")
 async def startup_event():
@@ -29,22 +35,8 @@ data_frame: Optional[pl.DataFrame] = None
 
 @app.get("/", response_class=HTMLResponse)
 async def get_index(request: Request):
-    data_frame = request.app.state.data_frame
-    if data_frame is None:
-         mermaid_diagram = """
-    graph TD;
-        df1[No Data];
-    """
-    else:
-        mermaid_diagram = """
-    graph TD;
-        df1[Raw Data];
-    """
-
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "mermaid_diagram": mermaid_diagram
-    })
+    indexPath = os.path.join("frontend", "public", "index.html")
+    return FileResponse(indexPath)
     
 @app.get("/data_preview", response_class=HTMLResponse)
 async def get_data_preview(request: Request):
