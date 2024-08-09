@@ -12,6 +12,7 @@ If you would like to check the existing `streamlit` version, please click [here]
 - **Session-Based Data Management and Logging**: Sessions store datasets and their transformation history, ensuring reproducibility and enabling users to track changes and reapply operations systematically.
 
 ### Purpose
+
 In many data organizations, it is estimated that 30-40% of time is spent addressing data quality issues rather than focusing on value-adding activities. miniEDA aims to reduce these costs by providing a reliable tool that mitigates common data quality problems. Furthermore, by offering a user-friendly, no-code interface, the project enables non-developers to actively engage with data, allowing domain experts to explore and utilize data more effectively. This not only democratizes data usage but also enhances the overall efficiency and output of data-driven projects.
 
 ### Installation
@@ -24,7 +25,19 @@ cd miniEDA
 pip install -r requirements.txt
 ```
 
-### Usage
+### Build frontend
+
+Build frontend with gatsby by running:
+
+```sh
+cd frontend
+npm install
+npm run build
+```
+
+This will generate a `public` directory inside the `frontend` directory. The files built during this step are served by FastAPI, which references them to deliver the frontend.
+
+### Run
 
 Start the FastAPI server by running:
 
