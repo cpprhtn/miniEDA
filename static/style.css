@@ -1,123 +1,148 @@
 body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    margin: 0;
-    padding: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  margin: 0;
+  padding: 0;
 }
 
 .sidebar {
-    width: 200px;
-    background-color: #343a40;
-    padding: 15px;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
+  width: 200px;
+  background-color: #343a40;
+  padding: 15px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
 .sidebar a {
-    display: block;
-    color: #fff;
-    padding: 10px 15px;
-    text-decoration: none;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    transition: background 0.3s;
+  display: block;
+  color: #fff;
+  padding: 10px 15px;
+  text-decoration: none;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  transition: background 0.3s;
 }
 
 .sidebar a:hover {
-    background-color: #495057;
+  background-color: #495057;
 }
 
 .main-content {
-    margin-left: 200px;
-    padding: 20px;
-    width: calc(100% - 200px);
-    display: flex;
-    flex: 1;
-    flex-direction: row;
+  margin-left: 200px;
+  padding: 20px;
+  width: calc(100% - 200px);
+  display: flex;
+  flex: 1;
+  flex-direction: row;
 }
 
 .workflow {
-    flex: 2;
-    padding: 20px;
-    overflow: auto;
+  flex: 2;
+  padding: 20px;
+  overflow: auto;
 }
 
 .content {
-    flex: 1;
-    padding: 20px;
-    border-left : thick solid #ccc;
-    height : 100vh;
+  flex: 1;
+  padding: 20px;
+  border-left: thick solid #ccc;
+  height: 100vh;
 }
 
 h1 {
-    color: #343a40;
+  color: #343a40;
 }
 
 form {
-    max-width: 500px;
+  max-width: 500px;
 }
 
 input[type="file"],
 input[type="text"],
 input[type="number"],
 select {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 button {
-    background-color: #007bff;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background 0.3s;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s;
 }
 
 button:hover {
-    background-color: #0056b3;
+  background-color: #0056b3;
 }
 
 label {
-    display: block;
-    margin: 10px 0 5px;
-    font-weight: bold;
+  display: block;
+  margin: 10px 0 5px;
+  font-weight: bold;
 }
 
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
 }
 
-table, th, td {
-    border: 1px solid #ddd;
+table,
+th,
+td {
+  border: 1px solid #ddd;
 }
 
-th, td {
-    padding: 10px;
-    text-align: left;
+th,
+td {
+  padding: 10px;
+  text-align: left;
 }
 
 th {
-    background-color: #f2f2f2;
+  background-color: #f2f2f2;
 }
 
-.checkbox-container, .radio-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
+.checkbox-container,
+.radio-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .checkbox-container input[type="checkbox"],
 .radio-container input[type="radio"] {
-    margin-right: 10px;
+  margin-right: 10px;
+}
+
+.controller-panel {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  width: 300px;
+  background-color: #fdfdfd;
+  border: 1px solid #f4f4f4;
+  padding: 1rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+}
+
+.controller-panel h2 {
+  margin-top: 0;
+}
+
+.canvas-container {
+  margin: 1rem;
 }
