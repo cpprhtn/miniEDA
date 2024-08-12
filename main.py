@@ -45,6 +45,24 @@ async def get_index(request: Request):
         "request": request,
         "mermaid_diagram": mermaid_diagram
     })
+
+@app.get("/canvas", response_class=HTMLResponse)
+async def get_canvas(request: Request):
+    return templates.TemplateResponse("canvas.html", {
+        "request": request,
+        "diagram": {
+            "nodes": [
+                {"id": "vert1", "label": "Hello1"},
+                {"id": "vert2", "label": "Hello2"},
+                {"id": "vert3", "label": "Hello3"},
+                {"id": "vert4", "label": "Hello4"},
+            ],
+            "edges": [
+                {"source": "vert1", "target": "vert2"},
+                {"source": "vert3", "target": "vert4"},
+            ]
+        }
+    })
     
 @app.get("/data_preview", response_class=HTMLResponse)
 async def get_data_preview(request: Request):
