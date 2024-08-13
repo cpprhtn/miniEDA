@@ -1,0 +1,53 @@
+:root {
+  --text-color: #101010;
+}
+
+body,
+button {
+  color: var(--text-color);
+}
+
+button {
+  display: inline-block;
+  border: none;
+  background-color: transparent;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+button:hover {
+  background-color: #f4f4f4;
+}
+
+button:active {
+  background-color: #e4e4e4;
+}
+
+.controller-panel {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  width: 300px;
+  background-color: #fdfdfd;
+  border: 1px solid #f4f4f4;
+  padding: 2rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+}
+
+.controller-panel h3 {
+  margin-top: 0;
+}
+
+.canvas-container {
+  margin: 1rem;
+}
+
+.controller-panel-header {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+}

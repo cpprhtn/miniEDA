@@ -3,24 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/canvas.css" />
     <title>miniEDA</title>
     <script>
       // Variable from FastAPI, Ignore the error occurred below line.
       const data = {{ diagram | tojson }};
     </script>
-    <script type="module" src="/static/canvas.js"></script>
+    <script type="module" src="/static/canvas.js">
+      import { draw } from "/static/canvas.js";
+    </script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   </head>
   <body>
     <div class="controller-panel">
-      <h2>Menu</h2>
-      <ul>
-        <li><a href="#">Item 1</a></li>
-        <li><a href="#">Item 2</a></li>
-        <li><a href="#">Item 3</a></li>
-        <li><a href="#">Item 4</a></li>
-      </ul>
+      <header class="controller-panel-header">
+        <button id="create-node">+</button>
+      </header>
     </div>
     <div class="canvas-container">
       <div id="diagram-canvas" class="mermaid"></div>
