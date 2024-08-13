@@ -8,7 +8,7 @@ mermaid.initialize({ startOnLoad: false });
 /** @type {WorkflowGraph} */
 const diagram = data;
 
-async function draw() {
+function draw() {
   const diagramCanvas = document.getElementById("diagram-canvas");
   if (!diagramCanvas) {
     throw new Error("Diagram canvas not found");
@@ -53,4 +53,3 @@ window.onload = () => {
   draw();
   initListeners();
 };
-window.draw = draw;
