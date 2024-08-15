@@ -1,14 +1,17 @@
 import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
 
 import { createId, createRandomString } from "./util.js";
-import { useState } from "./state.js";
+import {
+  callAllStateChangeListener,
+  registerStateChangeListener,
+  useState,
+} from "./state.js";
 import "./controller-panel.js";
 
 mermaid.initialize({ startOnLoad: false, securityLevel: "loose" });
 
-function draw() {
-  const [diagram] = useState("diagram");
-
+/** @param {WorkflowGraph} diagram */
+function draw(diagram) {
   const diagramCanvas = document.getElementById("diagram-canvas");
   if (!diagramCanvas) {
     throw new Error("Diagram canvas not found");
@@ -41,11 +44,18 @@ function draw() {
   mermaid.run();
 }
 
+registerStateChangeListener("diagram", draw);
+
 function createNode() {
+  const [diagram, setDiagram] = useState("diagram");
+
   const id = createId();
   const label = `새로운 노드(${createRandomString(3)})`;
-  diagram.nodes.push({ id, label });
-  draw();
+
+  setDiagram({
+    ...diagram,
+    nodes: [...diagram.nodes, { id, label }],
+  });
 }
 
 function initListeners() {
@@ -56,7 +66,7 @@ function initListeners() {
 }
 
 window.onload = () => {
-  draw();
+  callAllStateChangeListener();
   initListeners();
 };
 

@@ -21,6 +21,12 @@ const state = new Proxy(initialState, {
   },
 });
 
+export function callAllStateChangeListener() {
+  Object.keys(stateChangeListenerMap).forEach((key) => {
+    stateChangeListenerMap[key].forEach((listener) => listener(state[key]));
+  });
+}
+
 /**
  * @param {keyof State} key
  * @param {StateChangeListener} listener
