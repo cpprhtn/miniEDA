@@ -125,24 +125,3 @@ th {
 .radio-container input[type="radio"] {
   margin-right: 10px;
 }
-
-.controller-panel {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  bottom: 1rem;
-  width: 300px;
-  background-color: #fdfdfd;
-  border: 1px solid #f4f4f4;
-  padding: 1rem;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-  border-radius: 16px;
-}
-
-.controller-panel h2 {
-  margin-top: 0;
-}
-
-.canvas-container {
-  margin: 1rem;
-}
