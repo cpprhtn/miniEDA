@@ -1,14 +1,14 @@
-/// <reference path="../types/diagram.d.ts" />
-
 import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
 import { createId, createRandomString } from "./util.js";
+import { useState } from "./state.js";
+import "./controller-panel.js";
 
-mermaid.initialize({ startOnLoad: false });
-
-/** @type {WorkflowGraph} */
-const diagram = data;
+mermaid.initialize({ startOnLoad: false, securityLevel: "loose" });
 
 function draw() {
+  const [diagram] = useState("diagram");
+
   const diagramCanvas = document.getElementById("diagram-canvas");
   if (!diagramCanvas) {
     throw new Error("Diagram canvas not found");
@@ -16,14 +16,20 @@ function draw() {
 
   let mermaidText = `flowchart LR`;
 
-  diagram.nodes?.forEach((vertex) => {
+  diagram.nodes?.forEach((node) => {
     mermaidText += `
-      ${vertex.id}["${vertex.label}"]
+      ${node.id}["${node.label}"]
     `;
   });
   diagram.edges?.forEach((edge) => {
     mermaidText += `
       ${edge.source} --> ${edge.target}
+    `;
+  });
+
+  diagram.nodes?.forEach((node) => {
+    mermaidText += `
+      click ${node.id} href "javascript:onClickNode('${node.id}')"
     `;
   });
 
@@ -52,4 +58,14 @@ function initListeners() {
 window.onload = () => {
   draw();
   initListeners();
+};
+
+window.onClickNode = (nodeId) => {
+  const [diagram] = useState("diagram");
+  const [, setSelectedNode] = useState("selectedNode");
+
+  const node = diagram.nodes.find((node) => node.id === nodeId);
+  if (!node) return;
+
+  setSelectedNode(node);
 };
