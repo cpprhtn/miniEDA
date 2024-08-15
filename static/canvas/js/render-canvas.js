@@ -1,12 +1,6 @@
 import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
 
-import { createId, createRandomString } from "./util.js";
-import {
-  callAllStateChangeListener,
-  registerStateChangeListener,
-  useState,
-} from "./state.js";
-import "./controller-panel.js";
+import { registerStateChangeListener } from "./state.js";
 
 mermaid.initialize({ startOnLoad: false, securityLevel: "loose" });
 
@@ -45,37 +39,3 @@ function draw(diagram) {
 }
 
 registerStateChangeListener("diagram", draw);
-
-function createNode() {
-  const [diagram, setDiagram] = useState("diagram");
-
-  const id = createId();
-  const label = `새로운 노드(${createRandomString(3)})`;
-
-  setDiagram({
-    ...diagram,
-    nodes: [...diagram.nodes, { id, label }],
-  });
-}
-
-function initListeners() {
-  const createNodeButton = document.getElementById("create-node");
-  if (createNodeButton) {
-    createNodeButton.onclick = createNode;
-  }
-}
-
-window.onload = () => {
-  callAllStateChangeListener();
-  initListeners();
-};
-
-window.onClickNode = (nodeId) => {
-  const [diagram] = useState("diagram");
-  const [, setSelectedNode] = useState("selectedNode");
-
-  const node = diagram.nodes.find((node) => node.id === nodeId);
-  if (!node) return;
-
-  setSelectedNode(node);
-};
