@@ -1,7 +1,4 @@
-type DataNode = {
-  id: string;
-  label: string;
-};
+/// <reference path="./node.d.ts" />
 
 type Edge = {
   from: DataNode;
@@ -12,3 +9,5 @@ type WorkflowGraph = {
   nodes: DataNode[];
   edges: Edge[];
 };
+
+type OnNodeClickedListener = (node: DataNode) => void;
