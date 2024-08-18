@@ -15,7 +15,7 @@ function renderNormalNodePanel(node) {
   panel.innerHTML = `
     <h2>Node</h2>
     <p>Node ID: ${node.id}</p>
-    <p>Node label: ${node.label}</p>
+    <p>Node name: ${node.name}</p>
   `;
 }
 
