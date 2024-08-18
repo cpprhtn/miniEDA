@@ -2,6 +2,7 @@
 
 type PresentationNode = BaseNode & {
   type: NodeType.PRESENTATION;
+  from: BaseNodeId;
 };
 
 type SaveToFileNode = BaseNode & {
