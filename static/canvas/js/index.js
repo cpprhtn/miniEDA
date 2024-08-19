@@ -1,26 +1,14 @@
-import "./render-controller-panel.js";
+import "./controller-panel/index.js";
 import "./render-canvas.js";
 
 import { callAllStateChangeListener } from "./state.js";
-import { createId, createRandomString } from "./util.js";
 import { useState } from "./state.js";
-
-function createNode() {
-  const [diagram, setDiagram] = useState("diagram");
-
-  const id = createId();
-  const name = `새로운 노드(${createRandomString(3)})`;
-
-  setDiagram({
-    ...diagram,
-    nodes: [...diagram.nodes, { id, name }],
-  });
-}
+import { createDraftNode } from "./nodes.js";
 
 function initListeners() {
   const createNodeButton = document.getElementById("create-node");
   if (createNodeButton) {
-    createNodeButton.onclick = createNode;
+    createNodeButton.onclick = createDraftNode;
   }
 }
 
@@ -29,7 +17,10 @@ window.onload = () => {
   initListeners();
 };
 
-window.onClickNode = (nodeId) => {
+/**
+ * @param {string} nodeId
+ */
+window["onClickNode"] = (nodeId) => {
   const [diagram] = useState("diagram");
   const [, setSelectedNode] = useState("selectedNode");
 

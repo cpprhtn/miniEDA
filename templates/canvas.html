@@ -7,7 +7,7 @@
     <title>miniEDA</title>
     <script>
       // Variable from FastAPI, Ignore the error occurred below line.
-      const data = {{ diagram | tojson }};
+      window.data = {{ diagram | tojson }};
     </script>
     <script type="module" src="/static/canvas/js/index.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -17,6 +17,7 @@
       <header id="controller-panel-header">
         <button id="create-node">+</button>
       </header>
+      <div class="h-divider"></div>
       <div id="controller-panel-body"></div>
     </div>
     <div class="canvas-container">

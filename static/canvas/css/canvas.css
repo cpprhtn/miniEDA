@@ -46,8 +46,32 @@ button:active {
   margin: 1rem;
 }
 
+.h-divider {
+  margin: 0.5rem 0;
+  border-top: 1px solid #f4f4f4;
+}
+
 #controller-panel-header {
   display: flex;
   justify-content: end;
   align-items: center;
+}
+
+#controller-panel-body {
+  margin-top: 0.5rem;
+}
+
+#controller-panel-body label {
+  color: #888;
+}
+
+#controller-panel-body .controller-panel-kv-element {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+#controller-panel-body .controller-panel-full-element {
+  width: 100%;
+  margin-bottom: 1rem;
 }
