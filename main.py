@@ -52,15 +52,7 @@ async def get_canvas(request: Request):
         "request": request,
         "diagram": {
             "nodes": [
-                {"id": "vert1", "name": "Hello1"},
-                {"id": "vert2", "name": "Hello2"},
-                {"id": "vert3", "name": "Hello3"},
-                {"id": "vert4", "name": "Hello4"},
             ],
-            "edges": [
-                {"source": "vert1", "target": "vert2"},
-                {"source": "vert3", "target": "vert4"},
-            ]
         }
     })
     

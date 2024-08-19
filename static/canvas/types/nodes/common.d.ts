@@ -1,14 +1,9 @@
-declare enum NodeType {
-  DRAFT = "DRAFT",
-  DATA = "DATA",
-  TRANSFORMER = "TRANSFORMER",
-  PRESENTATION = "PRESENTATION",
-}
+declare type NodeType = "DRAFT" | "DATA" | "TRANSFORMER" | "PRESENTATION";
 
 type BaseNodeId = string;
 
-type BaseNode = {
+type BaseNode<TNode extends NodeType = NodeType> = {
   id: BaseNodeId;
   name: string;
-  type: NodeType;
+  type: TNode;
 };

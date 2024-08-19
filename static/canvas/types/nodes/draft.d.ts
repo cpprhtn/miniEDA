@@ -1,5 +1,3 @@
 /// <reference path="./common.d.ts" />
 
-type DraftNode = BaseNode & {
-  type: NodeType.DRAFT;
-};
+type DraftNode = BaseNode<"DRAFT">;
