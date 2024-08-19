@@ -9,11 +9,11 @@ function createNode() {
   const [diagram, setDiagram] = useState("diagram");
 
   const id = createId();
-  const label = `새로운 노드(${createRandomString(3)})`;
+  const name = `새로운 노드(${createRandomString(3)})`;
 
   setDiagram({
     ...diagram,
-    nodes: [...diagram.nodes, { id, label }],
+    nodes: [...diagram.nodes, { id, name }],
   });
 }
 

@@ -15,7 +15,7 @@ function draw(diagram) {
 
   diagram.nodes?.forEach((node) => {
     mermaidText += `
-      ${node.id}["${node.label}"]
+      ${node.id}["${node.name}"]
     `;
   });
   diagram.edges?.forEach((edge) => {

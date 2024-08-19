@@ -1,5 +1,5 @@
 /// <reference path="./state.d.ts" />
 
-type RenderNormalNodePanelFn = (node: DataNode) => void;
+type RenderNormalNodePanelFn = (node: BaseNode) => void;
 
 type RenderControllerPanelFn = StateChangeListener<"selectedNode">;

@@ -46,7 +46,7 @@ button:active {
   margin: 1rem;
 }
 
-.controller-panel-header {
+#controller-panel-header {
   display: flex;
   justify-content: end;
   align-items: center;

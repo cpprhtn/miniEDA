@@ -1,13 +1,13 @@
-/// <reference path="./node.d.ts" />
+/// <reference path="./nodes/common.d.ts" />
 
 type Edge = {
-  from: DataNode;
-  to: DataNode;
+  from: BaseNode;
+  to: BaseNode;
 };
 
 type WorkflowGraph = {
-  nodes: DataNode[];
+  nodes: BaseNode[];
   edges: Edge[];
 };
 
-type OnNodeClickedListener = (node: DataNode) => void;
+type OnNodeClickedListener = (node: BaseNode) => void;
