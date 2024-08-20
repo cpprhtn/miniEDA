@@ -3,3 +3,4 @@
 .DS_Store
 /dataset
 fastapi + polars.md
+tests/test.py
