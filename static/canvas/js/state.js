@@ -2,7 +2,7 @@
 
 /** @type {State} */
 const initialState = {
-  diagram: data,
+  diagram: window["data"],
   selectedNode: null,
 };
 
@@ -28,9 +28,7 @@ export function callAllStateChangeListener() {
 }
 
 /**
- * @param {keyof State} key
- * @param {StateChangeListener} listener
- * @returns {void}
+ * @type {<K extends keyof State>(key: K, listener: StateChangeListener<K>) => void}
  */
 export function registerStateChangeListener(key, listener) {
   stateChangeListenerMap[key].push(listener);

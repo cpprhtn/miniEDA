@@ -1,9 +1,7 @@
 /// <reference path="./common.d.ts" />
 
-type DataNode = BaseNode & {
-  type: NodeType.DATA;
-};
+type DataNode = BaseNode<"DATA">;
 
-type LoadFileNode = BaseNode & {
-  filePath: string;
+type LoadFileNode = DataNode & {
+  filePath: string | null;
 };

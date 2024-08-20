@@ -1,3 +1,4 @@
+// @ts-ignore
 import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
 
 import { registerStateChangeListener } from "./state.js";
@@ -16,11 +17,6 @@ function draw(diagram) {
   diagram.nodes?.forEach((node) => {
     mermaidText += `
       ${node.id}["${node.name}"]
-    `;
-  });
-  diagram.edges?.forEach((edge) => {
-    mermaidText += `
-      ${edge.source} --> ${edge.target}
     `;
   });
 

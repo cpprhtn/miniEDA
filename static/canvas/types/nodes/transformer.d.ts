@@ -4,8 +4,7 @@ declare enum TransformAction {
   FILL_WITH_ZERO = "FILL_WITH_ZERO",
 }
 
-type DataTransformerNode = BaseNode & {
-  type: NodeType.TRANSFORMER;
+type DataTransformerNode = BaseNode<"TRANSFORMER"> & {
   action: TransformAction;
   from: BaseNodeId;
 };

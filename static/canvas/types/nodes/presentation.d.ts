@@ -1,10 +1,9 @@
 /// <reference path="./common.d.ts" />
 
-type PresentationNode = BaseNode & {
-  type: NodeType.PRESENTATION;
+type PresentationNode = BaseNode<"PRESENTATION"> & {
   from: BaseNodeId;
 };
 
-type SaveToFileNode = BaseNode & {
+type SaveToFileNode = PresentationNode & {
   filePath: string;
 };
