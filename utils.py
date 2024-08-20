@@ -1,14 +1,18 @@
 import polars as pl
 import time
 from typing import Union, List, Dict, Callable, Optional
+import io
 # print(pl.__version__)
 
 # 파일 읽기
-def read_file(filename: str, file_type: str, encoding: str = "utf-8", infer_sampling: int = 1000, header: bool = True) -> pl.DataFrame:
+def read_file(filename: Union[str, io.BytesIO], file_type: str, encoding: str = "utf-8", infer_sampling: int = 1000, header: bool = True) -> pl.DataFrame:
     start = time.time()
     
     if file_type == 'csv':
-        df = pl.read_csv(filename, infer_schema_length=infer_sampling, encoding=encoding, ignore_errors=True, has_header=header)
+        if isinstance(filename, str):
+            df = pl.read_csv(filename, infer_schema_length=infer_sampling, encoding=encoding, ignore_errors=True, has_header=header)
+        else:
+            df = pl.read_csv(io.BytesIO(filename.read()), infer_schema_length=infer_sampling, encoding=encoding, ignore_errors=True, has_header=header)
     elif file_type == 'xlsx':
         df = pl.read_excel(filename, sheet_id=0)
     elif file_type == 'json':
@@ -24,7 +28,7 @@ def read_file(filename: str, file_type: str, encoding: str = "utf-8", infer_samp
     return df
 
 # Html로 변환
-def convert_html(data: pl.DataFrame) -> pl.DataFrame._repr_html_:
+def convert_html(data: pl.DataFrame) -> str:
     return data._repr_html_()
 
 # 결측치 보간
@@ -32,7 +36,7 @@ def fill_interpolation(data: pl.DataFrame, columns: Union[List[str], None] = Non
     if columns is None:
         columns = data.columns
     if type == "linear":
-        data = data.with_columns([data[col].interpolate() for col in columns])
+        data = data.with_columns([data[col].fill_null(0).interpolate() for col in columns])  # fill_null 추가
     else:
         data = data.with_columns([data[col].fill_null(strategy=type) if isinstance(type, str) else data[col].fill_null(type) for col in columns])
     return data
@@ -84,21 +88,24 @@ def slice_data(data: pl.DataFrame, start: int, end: int) -> pl.DataFrame:
 def rename_columns(data: pl.DataFrame, columns: Dict[str, str]) -> pl.DataFrame:
     return data.rename(columns)
 
-def pivot_data(data: pl.DataFrame, values: List[str], index: List[str], columns: List[str]) -> pl.DataFrame:
-    return data.pivot(values=values, index=index, columns=columns)
+def pivot_data(data: pl.DataFrame, values: List[str], index: List[str], on: List[str]) -> pl.DataFrame:
+    return data.pivot(values=values, index=index, on=on)
 
 def melt_data(data: pl.DataFrame, id_vars: List[str], value_vars: List[str]) -> pl.DataFrame:
     return data.melt(id_vars=id_vars, value_vars=value_vars)
 
+import polars as pl
+
 def filter_data(data: pl.DataFrame, condition: Union[str, pl.Expr, Callable[[pl.DataFrame], pl.DataFrame]]) -> pl.DataFrame:
     if isinstance(condition, str):
+        # 조건 문자열을 파싱하여 pl.Expr로 변환
         parts = condition.split()
         if len(parts) != 3:
             raise ValueError("Condition must be in the format 'column operator value'")
         
         col_name, operator, value = parts
         expr = pl.col(col_name)
-        
+
         try:
             value = float(value)
             if operator == '>':
@@ -124,7 +131,9 @@ def filter_data(data: pl.DataFrame, condition: Union[str, pl.Expr, Callable[[pl.
                 raise ValueError(f"Unsupported operator for string comparison: {operator}")
         
         return data.filter(condition_expr)
+    elif isinstance(condition, pl.Expr):
+        return data.filter(condition)
     elif callable(condition):
         return condition(data)
-    return data.filter(condition)
-
+    else:
+        raise ValueError("Unsupported condition type.")
