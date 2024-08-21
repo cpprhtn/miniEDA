@@ -1,6 +1,6 @@
 import pytest
 import polars as pl
-from utils import *
+from utils.utils import *
 from io import BytesIO
 
 

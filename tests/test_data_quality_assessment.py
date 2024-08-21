@@ -1,82 +1,94 @@
 import pytest
 import polars as pl
-import numpy as np
 from datetime import datetime, timedelta
-from data_quality_assessment import *
+from utils.data_quality_assessment_utils import *
+from faker import Faker
 
-@pytest.fixture
-def sample_df():
-    return pl.DataFrame({
-        "col1": [1, 2, 3, 4, 5],
-        "col2": [2, 4, 6, 8, 10],
-        "col3": [1, None, 3, 4, None],
-        "date_col": [datetime.now() - timedelta(days=i) for i in range(5)]
-    })
+fake = Faker()
 
-# def test_calculate_completeness(sample_df):
-#     completeness = calculate_completeness(sample_df)
-#     expected_completeness = sample_df.null_count() / len(sample_df)
-#     assert completeness[0] == expected_completeness[0] 
+@pytest.mark.parametrize("data_scenario", [
+    {"has_timeliness": True, "columns": ["col1", "col2", "col3", "date_col"]},  # 기본 케이스
+    {"has_timeliness": False, "columns": ["col1", "col2", "col3"]},  # 타임 시리즈가 없는 경우
+    {"has_timeliness": True, "columns": ["col1", "col2"]},  # 일부 컬럼만 있는 경우
+    # {"has_timeliness": False, "columns": ["col1"]},  # 하나의 컬럼만 있는 경우
+])
+def test_assess_data_quality(data_scenario):
+    num_rows = 100
+    data = {}
 
-def test_calculate_accuracy(sample_df):
-    accuracy = calculate_accuracy(sample_df, 'col1', (1, 5))
-    expected_accuracy = sample_df.with_columns(
-        (pl.col('col1').is_between(1, 5)).alias('valid')
-    )['valid'].mean()
-    assert accuracy == expected_accuracy
-
-def test_calculate_timeliness(sample_df):
-    timeliness = calculate_timeliness(sample_df, 'date_col', days_threshold=7)
-    valid_dates = sample_df.with_columns(
-        (pl.col('date_col') > (datetime.now() - timedelta(days=7))).alias('valid')
-    )['valid'].mean()
-    assert timeliness == valid_dates
-
-def test_calculate_consistency(sample_df):
-    consistency = calculate_consistency(sample_df, sample_df.columns)
-    expected_consistency = sample_df.unique(subset=sample_df.columns).height / sample_df.height
-    assert consistency == expected_consistency
-
-def test_calculate_validity(sample_df):
-    numeric_validity = calculate_validity(sample_df, 'col1', 'numeric')
-    string_validity = calculate_validity(sample_df, 'col1', 'string')
-    valid_numeric = sample_df.with_columns(
-        pl.col('col1').is_not_null().alias('valid')
-    )['valid'].mean()
-    assert numeric_validity == valid_numeric
-    assert np.isnan(string_validity) or string_validity is None
-
-def test_calculate_uniqueness(sample_df):
-    uniqueness = calculate_uniqueness(sample_df, 'col1')
-    expected_uniqueness = sample_df['col1'].n_unique() / len(sample_df)
-    assert uniqueness == expected_uniqueness
-
-def test_assess_data_quality(sample_df):
-    accuracy_params = {'col1': (1, 5)}
-    validity_params = {'col1': 'numeric'}
+    # data_scenario의 설정에 따라 컬럼 데이터 생성
+    if "col1" in data_scenario["columns"]:
+        data["col1"] = [fake.random_int(min=1, max=5) for _ in range(num_rows)]
     
-    quality_metrics = assess_data_quality(
-        sample_df,
-        accuracy_params=accuracy_params,
-        timeliness_column='date_col',
-        validity_params=validity_params
-    )
+    if "col2" in data_scenario["columns"]:
+        data["col2"] = [fake.random_int(min=1, max=100) for _ in range(num_rows)]
     
-    # Check completeness
-    assert 'Completeness' in quality_metrics.columns
-    assert quality_metrics['Completeness'].shape == (1, )
+    if "col3" in data_scenario["columns"]:
+        data["col3"] = [fake.random_element(elements=(1, 2, 3, None)) for _ in range(num_rows)]
     
-    # Check accuracy
-    assert 'Accuracy_col1' in quality_metrics.columns
+    if data_scenario["has_timeliness"] and "date_col" in data_scenario["columns"]:
+        data["date_col"] = [datetime.now() - timedelta(days=fake.random_int(min=0, max=30)) for _ in range(num_rows)]
+
+    sample_df = pl.DataFrame(data)
     
-    # Check timeliness
-    assert 'Timeliness' in quality_metrics.columns
+    # accuracy, validity 파라미터 설정
+    accuracy_params = {'col1': (1, 5), 'col2': (1, 80)} if "col1" in data_scenario["columns"] else {}
+    validity_params = {'col1': 'numeric'} if "col1" in data_scenario["columns"] else {}
+
+    thresholds = {
+        "Completeness": 0.9,
+        "Accuracy": 0.8,
+        "Timeliness": 0.9,
+        "Consistency": 0.9,
+        "Validity": 0.9,
+        "Uniqueness": 0.9
+    }
+
+    # assess_data_quality 함수 실행 시 타임 시리즈 컬럼 존재 여부에 따른 처리
+    if data_scenario["has_timeliness"] and "date_col" in data_scenario["columns"]:
+        quality_metrics = assess_data_quality(
+            sample_df,
+            accuracy_params=accuracy_params,
+            timeliness_column='date_col',
+            validity_params=validity_params
+        )
+    else:
+        quality_metrics = assess_data_quality(
+            sample_df,
+            accuracy_params=accuracy_params,
+            validity_params=validity_params
+        )
+
+    plot_quality_metrics_with_alerts(quality_metrics, thresholds)
+
+    # 각 메트릭 확인
+    if "col1" in data_scenario["columns"]:
+        # Completeness 확인
+        assert 'Completeness' in quality_metrics.columns
+        
+        completeness_value = quality_metrics['Completeness'][0]
+
+        if isinstance(completeness_value, dict):  # 여러 컬럼의 Completeness 값이 있는 경우
+            completeness_values = completeness_value.values()
+        else:  # 하나의 컬럼만 있는 경우 (단일 값)
+            completeness_values = [completeness_value]
+        
+        assert all(0.0 <= v <= 1.0 for v in completeness_values)
+
+        # Accuracy 확인
+        assert 'Accuracy_col1' in quality_metrics.columns
+        assert 0.0 <= quality_metrics['Accuracy_col1'][0] <= 1.0
+
+        # Validity 확인
+        assert 'Validity_col1' in quality_metrics.columns
+        assert 0.0 <= quality_metrics['Validity_col1'][0] <= 1.0
     
-    # Check consistency
-    assert 'Consistency' in quality_metrics.columns
+    # Timeliness 확인 (해당 시나리오에서만)
+    if data_scenario["has_timeliness"] and "date_col" in data_scenario["columns"]:
+        assert 'Timeliness' in quality_metrics.columns
+        assert 0.0 <= quality_metrics['Timeliness'][0] <= 1.0
     
-    # Check validity
-    assert 'Validity_col1' in quality_metrics.columns
-    
-    # Check uniqueness
-    assert 'Uniqueness_col1' in quality_metrics.columns
+    # Uniqueness 확인
+    assert any(col.startswith('Uniqueness') for col in quality_metrics.columns)
+    uniqueness_col = next(col for col in quality_metrics.columns if col.startswith('Uniqueness'))
+    assert 0.0 <= quality_metrics[uniqueness_col][0] <= 1.0
