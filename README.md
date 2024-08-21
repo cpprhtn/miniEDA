@@ -2,21 +2,23 @@
 
 ### Overview
 
-**miniEDA** is a lightweight, user-friendly data exploration and analysis tool that leverages the power of `polars` and `FastAPI`. Designed to streamline the process of exploratory data analysis (EDA), miniEDA allows users to perform various data preprocessing and quality assessment tasks efficiently. The tool emphasizes a session-based approach, enabling seamless management and transformation of datasets with detailed logging of each operation.
-If you would like to check the existing `streamlit` version, please click [here](https://github.com/cpprhtn/miniEDA/tree/streamlit).
+**miniEDA** is a lightweight, user-friendly data exploration and analysis tool designed to simplify data preprocessing and quality management. Leveraging the power of `polars` for efficient data handling and `FastAPI` for seamless interactions, miniEDA aims to streamline exploratory data analysis (EDA) processes. The platform is designed with a session-based approach, enabling effective dataset management, transformation, and detailed logging of operations.
+
+For an existing version using `streamlit`, please click [here](https://github.com/cpprhtn/miniEDA/tree/streamlit).
 
 ### Key Features
 
-- **No-Code Data Preprocessing and Visualization**: miniEDA allows users to perform data transformations and visualize data easily without writing code, making it accessible to non-technical users.
-- **Focus on Data Quality**: The tool incorporates considerations for data quality, including completeness, timeliness, validity, accuracy, consistency, and uniqueness, ensuring high standards are met across datasets.
-- **Session-Based Data Management and Logging**: Sessions store datasets and their transformation history, ensuring reproducibility and enabling users to track changes and reapply operations systematically.
+- **No-Code Data Preprocessing and Visualization**: miniEDA provides an intuitive interface for data transformations and visualizations without the need for coding, making it accessible to both technical and non-technical users.
+- **Enhanced Data Quality Management**: The tool incorporates robust data quality checks, addressing completeness, timeliness, validity, accuracy, consistency, and uniqueness, to ensure high standards across datasets.
+- **Session-Based Data Management**: The session-based architecture supports comprehensive data management and transformation history, facilitating reproducibility and efficient tracking of changes.
 
 ### Purpose
-In many data organizations, it is estimated that 30-40% of time is spent addressing data quality issues rather than focusing on value-adding activities. miniEDA aims to reduce these costs by providing a reliable tool that mitigates common data quality problems. Furthermore, by offering a user-friendly, no-code interface, the project enables non-developers to actively engage with data, allowing domain experts to explore and utilize data more effectively. This not only democratizes data usage but also enhances the overall efficiency and output of data-driven projects.
+
+Data organizations often spend 30-40% of their time addressing data quality issues rather than focusing on value-adding tasks. miniEDA is designed to reduce these overheads by offering a reliable solution to common data quality problems. With its no-code interface, miniEDA empowers domain experts and non-developers to engage more actively with data, promoting more effective exploration and utilization. This approach not only democratizes data access but also boosts overall project efficiency and output.
 
 ### Installation
 
-To install miniEDA, clone the repository and install the necessary dependencies. Python 3.11 or higher is recommended:
+To install miniEDA, clone the repository and install the required dependencies. Python 3.11 or higher is recommended:
 
 ```sh
 git clone https://github.com/cpprhtn/miniEDA.git
@@ -26,17 +28,17 @@ pip install -r requirements.txt
 
 ### Usage
 
-Start the FastAPI server by running:
+To start the FastAPI server, run the following command:
 
 ```sh
 uvicorn main:app --reload
 ```
 
-Then, access the application in your web browser at `http://localhost:8000`.
+Access the application in your web browser at `http://localhost:8000`.
 
 ### Contributing
 
-We welcome contributions! Please fork the repository and submit a pull request with your changes. Ensure your code adheres to the project's coding standards and includes appropriate tests.
+We welcome contributions! Please fork the repository and submit a pull request with your changes. Ensure that your code adheres to the project's coding standards and includes relevant tests.
 
 ### License
 
@@ -44,10 +46,10 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ### Future Enhancements
 
-- **Advanced Analytics**: Adding machine learning and statistical analysis capabilities.
-- **Data Visualization**: Enhanced support for data visualization and dashboarding.
-- **Integration**: Connect with more data sources and storage solutions.
+- **Advanced Analytics**: Integration of machine learning and advanced statistical analysis features.
+- **Enhanced Data Visualization**: Development of advanced data visualization and dashboarding capabilities.
+- **Broader Integration**: Expansion to connect with additional data sources and storage solutions.
 
 ### Contact
 
-For more information or to report issues, please visit the [issues](https://github.com/cpprhtn/miniEDA/issues) page.
+For more information or to report issues, please visit the [issues](https://github.com/cpprhtn/miniEDA/issues) page or contact us directly.
