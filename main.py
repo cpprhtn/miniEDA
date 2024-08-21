@@ -1,5 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, Form, Request, HTTPException
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, Response, FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from routers.casting import casting
@@ -8,7 +8,7 @@ from routers.filtering import filtering
 from routers.rename_columns import rename_columns
 import polars as pl
 from typing import Optional
-from utils import read_file, convert_html
+from utils.utils import read_file, convert_html
 
 app = FastAPI()
  
@@ -22,6 +22,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def startup_event():
     app.state.templates = templates
     app.state.data_frame = None
+    
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse("static/favicon.ico")
 
 templates = Jinja2Templates(directory="templates")
 
