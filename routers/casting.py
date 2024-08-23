@@ -2,8 +2,8 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse
 
-from utils.utils import type_casting, convert_html
-
+from utils.io_utils import convert_html
+from utils.data_processing import type_casting
 casting = APIRouter()
 
 @casting.get("/type_casting", response_class=HTMLResponse, tags=['casting'])

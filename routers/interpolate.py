@@ -2,7 +2,8 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse
 
-from utils.utils import fill_interpolation, convert_html
+from utils.io_utils import convert_html
+from utils.data_processing import fill_interpolation
 
 interpolate = APIRouter()
 

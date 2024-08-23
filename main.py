@@ -8,7 +8,7 @@ from routers.filtering import filtering
 from routers.rename_columns import rename_columns
 import polars as pl
 from typing import Optional
-from utils.utils import read_file, convert_html
+from utils.io_utils import read_file, convert_html
 
 app = FastAPI()
  

@@ -2,8 +2,8 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse
 
-from utils.utils import filter_data, convert_html
-
+from utils.io_utils import convert_html
+from utils.data_processing import filter_data
 filtering = APIRouter()
 
 @filtering.get("/filter_data", response_class=HTMLResponse)
