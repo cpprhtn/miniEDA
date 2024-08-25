@@ -75,3 +75,15 @@ button:active {
   width: 100%;
   margin-bottom: 1rem;
 }
+
+input[type="file"] {
+  display: none;
+}
+
+.input-file-custom-button {
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+  border: #888 1px solid;
+  border-radius: 4px;
+}
