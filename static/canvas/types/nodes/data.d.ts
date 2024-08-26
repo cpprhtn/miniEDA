@@ -1,7 +1,11 @@
 /// <reference path="./common.d.ts" />
 
-type DataNode = BaseNode<"DATA">;
+type DataNodeType = "LOAD_FILE";
 
-type LoadFileNode = DataNode & {
-  filePath: string | null;
+type DataNode<TData extends DataNodeType = DataNodeType> = BaseNode<"DATA"> & {
+  dataType: TData;
+};
+
+type LoadFileNode = DataNode<"LOAD_FILE"> & {
+  file: File | null;
 };
