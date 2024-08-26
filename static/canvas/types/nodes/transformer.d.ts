@@ -1,14 +1,12 @@
 /// <reference path="./common.d.ts" />
 
-declare enum TransformAction {
-  FILL_WITH_ZERO = "FILL_WITH_ZERO",
-}
+type TransformAction = "FILL_WITH_ZERO";
 
-type DataTransformerNode = BaseNode<"TRANSFORMER"> & {
-  action: TransformAction;
-  from: BaseNodeId;
-};
+type DataTransformerNode<TAction extends TransformAction = TransformAction> =
+  BaseNode<"TRANSFORMER"> & {
+    action: TAction;
+    from: BaseNodeId;
+  };
 
-type FillMissingValueWithZeroTransformerNode = DataTransformerNode & {
-  action: TransformAction.FILL_WITH_ZERO;
-};
+type FillMissingValueWithZeroTransformerNode =
+  DataTransformerNode<"FILL_WITH_ZERO">;

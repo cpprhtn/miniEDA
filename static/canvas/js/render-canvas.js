@@ -16,13 +16,37 @@ function draw(diagram) {
 
   diagram.nodes?.forEach((node) => {
     mermaidText += `
-      ${node.id}["${node.name}"]
+      ${node.id}["${node.name}"]:::${node.type}
     `;
   });
 
   diagram.nodes?.forEach((node) => {
     mermaidText += `
       click ${node.id} href "javascript:onClickNode('${node.id}')"
+    `;
+  });
+
+  diagram.nodes.forEach((node) => {
+    if (node.type === "TRANSFORMER") {
+      const transformerNode = /** @type {DataTransformerNode} */ (node);
+
+      if (transformerNode.from) {
+        mermaidText += `
+          ${transformerNode.from} --> ${transformerNode.id}
+        `;
+      }
+    }
+  });
+
+  const colorDefinitions = {
+    DRAFT: "#FFD700",
+    DATA: "#FFA07A",
+    TRANSFORMER: "#98FB98",
+    ACTION: "#87CEFA",
+  };
+  Object.entries(colorDefinitions).forEach(([type, color]) => {
+    mermaidText += `
+      classDef ${type} fill:${color},stroke:#333,stroke-width:2px;
     `;
   });
 

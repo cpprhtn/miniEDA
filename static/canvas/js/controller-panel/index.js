@@ -14,32 +14,49 @@ function renderDraftNodePanel(node) {
   }
 
   const [graph, setGraph] = useState("diagram");
-  const inputController = new InputController();
 
-  ControllerPanelHtmlBuilder.builder()
-    .title("Node")
-    .text("Node ID", node.id)
-    .text("Node name", node.name)
-    .select("Change type", ["DRAFT", "LOAD_FILE"], inputController)
-    .build(panel);
+  /** @type {(value: string) => void} */
+  const onChangeType = (value) => {
+    let newNode = null;
 
-  inputController.get().addEventListener("change", (ev) => {
-    if (ev.target["value"] === "LOAD_FILE") {
+    if (value === "LOAD_FILE") {
       /** @type {LoadFileNode} */
-      const newNode = {
+      const loadFileNode = {
         id: node.id,
         name: node.name,
         type: "DATA",
         dataType: "LOAD_FILE",
         file: null,
       };
-
-      setGraph({
-        nodes: [...graph.nodes.filter((v) => v.id !== node.id), newNode],
-      });
-      renderControllerPanel(newNode);
+      newNode = loadFileNode;
+    } else if (value === "FILL_MISSING_WITH_ZERO") {
+      /** @type {FillMissingValueWithZeroTransformerNode} */
+      const fillMissingValueWithZeroTransformerNode = {
+        id: node.id,
+        name: node.name,
+        type: "TRANSFORMER",
+        action: "FILL_WITH_ZERO",
+        from: null,
+      };
+      newNode = fillMissingValueWithZeroTransformerNode;
     }
-  });
+
+    setGraph({
+      nodes: [...graph.nodes.filter((v) => v.id !== node.id), newNode],
+    });
+    renderControllerPanel(newNode);
+  };
+
+  ControllerPanelHtmlBuilder.builder()
+    .title("Draft node")
+    .text("Node ID", node.id)
+    .text("Node name", node.name)
+    .select(
+      "Change type",
+      ["DRAFT", "LOAD_FILE", "FILL_MISSING_WITH_ZERO"],
+      onChangeType
+    )
+    .build(panel);
 }
 
 /**
@@ -67,7 +84,7 @@ function renderLoadFileNodePanel(node) {
   const fileController = new InputController();
 
   ControllerPanelHtmlBuilder.builder()
-    .title("Node")
+    .title("Load file node")
     .text("Node ID", node.id)
     .text("Node name", node.name)
     .file("File", node.file, fileController)
@@ -93,6 +110,77 @@ function renderLoadFileNodePanel(node) {
   });
 }
 
+/**
+ * @param {DataTransformerNode} node
+ */
+function renderTransformerNodePanel(node) {
+  switch (node.action) {
+    case "FILL_WITH_ZERO":
+      const fillWithZeroNode =
+        /** @type {FillMissingValueWithZeroTransformerNode} */ (node);
+      renderFillWithZeroNodePanel(fillWithZeroNode);
+      break;
+  }
+}
+
+/**
+ * @param {FillMissingValueWithZeroTransformerNode} node
+ */
+function renderFillWithZeroNodePanel(node) {
+  const panel = document.getElementById("controller-panel-body");
+  if (!panel) {
+    return;
+  }
+
+  const [graph, setGraph] = useState("diagram");
+  const fromNodeInputController = new InputController();
+
+  /** @type {(fromNodeId: string) => void } */
+  const onConfirmFromNode = (fromNodeId) => {
+    if (node.id === fromNodeId) {
+      alert("Cannot connect to itself");
+      return;
+    }
+
+    const fromNode = graph.nodes.find((v) => v.id === fromNodeId);
+    if (!fromNode) {
+      alert("Node not found");
+      return;
+    }
+
+    if (!["DATA", "TRANSFORMER"].includes(fromNode.type)) {
+      alert("Invalid type for connection");
+      return;
+    }
+
+    /** @type {FillMissingValueWithZeroTransformerNode} */
+    const newNode = {
+      id: node.id,
+      name: node.name,
+      type: "TRANSFORMER",
+      action: "FILL_WITH_ZERO",
+      from: fromNodeId,
+    };
+
+    setGraph({
+      nodes: [...graph.nodes.filter((v) => v.id !== node.id), newNode],
+    });
+    renderControllerPanel(newNode);
+  };
+
+  ControllerPanelHtmlBuilder.builder()
+    .title("Fill with zero node")
+    .text("Node ID", node.id)
+    .text("Node name", node.name)
+    .textField(
+      "From (Node ID)",
+      node.from ?? "",
+      fromNodeInputController,
+      onConfirmFromNode
+    )
+    .build(panel);
+}
+
 /** @type {RenderControllerPanelFn} */
 export function renderControllerPanel(node) {
   if (!node) {
@@ -107,6 +195,10 @@ export function renderControllerPanel(node) {
     case "DATA":
       const dataNode = /** @type {DataNode} */ (node);
       renderDataNodePanel(dataNode);
+      break;
+    case "TRANSFORMER":
+      const transformerNode = /** @type {DataTransformerNode} */ (node);
+      renderTransformerNodePanel(transformerNode);
       break;
   }
 }

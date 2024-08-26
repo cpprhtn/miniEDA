@@ -7,7 +7,8 @@ type ControllerPanelHtmlElement =
   | ControllerPanelHtmlTitle
   | ControllerPanelHtmlText
   | ControllerPanelHtmlSelect
-  | ControllerPanelHtmlFile;
+  | ControllerPanelHtmlFile
+  | ControllerPanelHtmlTextField;
 
 type ControllerPanelHtmlTitle = {
   type: "title";
@@ -25,6 +26,7 @@ type ControllerPanelHtmlSelect = {
   id: string;
   label: string;
   options: string[];
+  onChange?: (value: string) => void;
 };
 
 type ControllerPanelHtmlFile = {
@@ -32,4 +34,12 @@ type ControllerPanelHtmlFile = {
   id: string;
   label: string;
   file: File | null;
+};
+
+type ControllerPanelHtmlTextField = {
+  type: "text-field";
+  id: string;
+  label: string;
+  value: string;
+  onConfirm?: (value: string) => void;
 };
