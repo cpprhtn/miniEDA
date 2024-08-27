@@ -31,13 +31,12 @@ export class ControllerPanelHtmlBuilder {
   /**
    * @param {string} label
    * @param {string[]} options
-   * @param {InputController} controller
+   * @param {((value: string) => void)=} onChange
    * @returns {this}
    */
-  select(label, options, controller) {
+  select(label, options, onChange) {
     const newId = createId();
-    this.contents.push({ id: newId, type: "select", label, options });
-    controller.attach(newId);
+    this.contents.push({ id: newId, type: "select", label, options, onChange });
     return this;
   }
 
@@ -50,6 +49,26 @@ export class ControllerPanelHtmlBuilder {
   file(label, file, controller) {
     const newId = createId();
     this.contents.push({ id: newId, type: "file", label, file });
+    controller.attach(newId);
+    return this;
+  }
+
+  /**
+   * @param {string} label
+   * @param {string} value
+   * @param {InputController} controller
+   * @param {((value: string) => void)=} onSubmit
+   * @returns {this}
+   */
+  textField(label, value, controller, onSubmit) {
+    const newId = createId();
+    this.contents.push({
+      type: "text-field",
+      id: newId,
+      label,
+      value,
+      onConfirm: onSubmit,
+    });
     controller.attach(newId);
     return this;
   }
@@ -96,6 +115,13 @@ export class ControllerPanelHtmlBuilder {
                 </label>
               </div>
             `;
+          case "text-field":
+            return `
+              <div class="controller-panel-kv-element">
+                <label>${content.label}</label>
+                <input id="${content.id}" type="text" value="${content.value}">
+              </div>
+            `;
         }
       })
       .join("\n");
@@ -103,8 +129,23 @@ export class ControllerPanelHtmlBuilder {
     container.innerHTML = ui;
 
     this.contents.forEach((content) => {
-      // UI 생성 후 후처리 필요 시 사용
-      // ex) event listener
+      if (content.type === "select") {
+        const select = document.getElementById(content.id);
+        if (select) {
+          select.addEventListener("change", (ev) => {
+            content.onChange(ev.target["value"]);
+          });
+        }
+      } else if (content.type === "text-field") {
+        const input = document.getElementById(content.id);
+        if (input) {
+          input.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter") {
+              content.onConfirm(ev.target["value"]);
+            }
+          });
+        }
+      }
     });
   }
 
