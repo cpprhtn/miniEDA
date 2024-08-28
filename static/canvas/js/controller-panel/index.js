@@ -39,6 +39,17 @@ function renderDraftNodePanel(node) {
         from: null,
       };
       newNode = fillMissingValueWithZeroTransformerNode;
+    } else if (value === "SAVE_TO_FILE") {
+      /** @type {SaveToFileNode} */
+      const saveToFileNode = {
+        id: node.id,
+        name: node.name,
+        type: "PRESENTATION",
+        action: "SAVE_TO_FILE",
+        from: null,
+        filePath: null,
+      };
+      newNode = saveToFileNode;
     }
 
     setGraph({
@@ -53,7 +64,7 @@ function renderDraftNodePanel(node) {
     .text("Node name", node.name)
     .select(
       "Change type",
-      ["DRAFT", "LOAD_FILE", "FILL_MISSING_WITH_ZERO"],
+      ["DRAFT", "LOAD_FILE", "FILL_MISSING_WITH_ZERO", "SAVE_TO_FILE"],
       onChangeType
     )
     .build(panel);
@@ -181,6 +192,78 @@ function renderFillWithZeroNodePanel(node) {
     .build(panel);
 }
 
+/**
+ * @param {PresentationNode} node
+ */
+function renderPresentationNodePanel(node) {
+  switch (node.action) {
+    case "SAVE_TO_FILE":
+      const saveToFileNode = /** @type {SaveToFileNode} */ (node);
+      renderSaveToFileNodePanel(saveToFileNode);
+      break;
+  }
+}
+
+/**
+ * @param {SaveToFileNode} node
+ */
+function renderSaveToFileNodePanel(node) {
+  const panel = document.getElementById("controller-panel-body");
+  if (!panel) {
+    return;
+  }
+
+  const [graph, setGraph] = useState("diagram");
+
+  /** @type {<K extends keyof SaveToFileNode>(key: K, value: SaveToFileNode[K]) => void} */
+  const applyChange = (key, value) => {
+    /** @type {SaveToFileNode} */
+    const newNode = {
+      ...node,
+      [key]: value,
+    };
+
+    setGraph({
+      nodes: [...graph.nodes.filter((v) => v.id !== node.id), newNode],
+    });
+    renderControllerPanel(newNode);
+  };
+
+  /** @type {(fromNodeId: string) => void } */
+  const onConfirmFromNode = (fromNodeId) => {
+    if (node.id === fromNodeId) {
+      alert("Cannot connect to itself");
+      return;
+    }
+
+    const fromNode = graph.nodes.find((v) => v.id === fromNodeId);
+    if (!fromNode) {
+      alert("Node not found");
+      return;
+    }
+
+    if (!["DATA", "TRANSFORMER"].includes(fromNode.type)) {
+      alert("Invalid type for connection");
+      return;
+    }
+
+    applyChange("from", fromNodeId);
+  };
+
+  /** @type {(filePath: string) => void } */
+  const onConfirmFilePath = (filePath) => {
+    applyChange("filePath", filePath);
+  };
+
+  ControllerPanelHtmlBuilder.builder()
+    .title("Save to file node")
+    .text("Node ID", node.id)
+    .text("Node name", node.name)
+    .textField("From (Node ID)", node.from ?? "", null, onConfirmFromNode)
+    .textField("File path", node.filePath ?? "", null, onConfirmFilePath)
+    .build(panel);
+}
+
 /** @type {RenderControllerPanelFn} */
 export function renderControllerPanel(node) {
   if (!node) {
@@ -199,6 +282,10 @@ export function renderControllerPanel(node) {
     case "TRANSFORMER":
       const transformerNode = /** @type {DataTransformerNode} */ (node);
       renderTransformerNodePanel(transformerNode);
+      break;
+    case "PRESENTATION":
+      const presentationNode = /** @type {PresentationNode} */ (node);
+      renderPresentationNodePanel(presentationNode);
       break;
   }
 }

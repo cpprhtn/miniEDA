@@ -5,7 +5,7 @@ type TransformAction = "FILL_WITH_ZERO";
 type DataTransformerNode<TAction extends TransformAction = TransformAction> =
   BaseNode<"TRANSFORMER"> & {
     action: TAction;
-    from: BaseNodeId;
+    from: BaseNodeId | null;
   };
 
 type FillMissingValueWithZeroTransformerNode =
