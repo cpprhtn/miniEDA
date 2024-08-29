@@ -35,6 +35,14 @@ function draw(diagram) {
           ${transformerNode.from} --> ${transformerNode.id}
         `;
       }
+    } else if (node.type === "PRESENTATION") {
+      const presentationNode = /** @type {PresentationNode} */ (node);
+
+      if (presentationNode.from) {
+        mermaidText += `
+          ${presentationNode.from} --> ${presentationNode.id}
+        `;
+      }
     }
   });
 
@@ -42,7 +50,7 @@ function draw(diagram) {
     DRAFT: "#FFD700",
     DATA: "#FFA07A",
     TRANSFORMER: "#98FB98",
-    ACTION: "#87CEFA",
+    PRESENTATION: "#87CEFA",
   };
   Object.entries(colorDefinitions).forEach(([type, color]) => {
     mermaidText += `

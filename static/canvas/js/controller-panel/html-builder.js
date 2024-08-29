@@ -43,20 +43,20 @@ export class ControllerPanelHtmlBuilder {
   /**
    * @param {string} label
    * @param {File | null} file
-   * @param {InputController} controller
+   * @param {InputController | null} controller
    * @returns {this}
    */
   file(label, file, controller) {
     const newId = createId();
     this.contents.push({ id: newId, type: "file", label, file });
-    controller.attach(newId);
+    controller?.attach(newId);
     return this;
   }
 
   /**
    * @param {string} label
    * @param {string} value
-   * @param {InputController} controller
+   * @param {InputController | null} controller
    * @param {((value: string) => void)=} onSubmit
    * @returns {this}
    */
@@ -69,7 +69,7 @@ export class ControllerPanelHtmlBuilder {
       value,
       onConfirm: onSubmit,
     });
-    controller.attach(newId);
+    controller?.attach(newId);
     return this;
   }
 
