@@ -36,7 +36,7 @@ function renderDraftNodePanel(node) {
         name: node.name,
         type: "TRANSFORMER",
         action: "FILL_WITH_ZERO",
-        from: null,
+        fromNodeId: null,
       };
       newNode = fillMissingValueWithZeroTransformerNode;
     } else if (value === "SAVE_TO_FILE") {
@@ -46,7 +46,7 @@ function renderDraftNodePanel(node) {
         name: node.name,
         type: "PRESENTATION",
         action: "SAVE_TO_FILE",
-        from: null,
+        fromNodeId: null,
         filePath: null,
       };
       newNode = saveToFileNode;
@@ -170,7 +170,7 @@ function renderFillWithZeroNodePanel(node) {
       name: node.name,
       type: "TRANSFORMER",
       action: "FILL_WITH_ZERO",
-      from: fromNodeId,
+      fromNodeId: fromNodeId,
     };
 
     setGraph({
@@ -185,7 +185,7 @@ function renderFillWithZeroNodePanel(node) {
     .text("Node name", node.name)
     .textField(
       "From (Node ID)",
-      node.from ?? "",
+      node.fromNodeId ?? "",
       fromNodeInputController,
       onConfirmFromNode
     )
@@ -247,7 +247,7 @@ function renderSaveToFileNodePanel(node) {
       return;
     }
 
-    applyChange("from", fromNodeId);
+    applyChange("fromNodeId", fromNodeId);
   };
 
   /** @type {(filePath: string) => void } */
@@ -259,7 +259,7 @@ function renderSaveToFileNodePanel(node) {
     .title("Save to file node")
     .text("Node ID", node.id)
     .text("Node name", node.name)
-    .textField("From (Node ID)", node.from ?? "", null, onConfirmFromNode)
+    .textField("From (Node ID)", node.fromNodeId ?? "", null, onConfirmFromNode)
     .textField("File path", node.filePath ?? "", null, onConfirmFilePath)
     .build(panel);
 }

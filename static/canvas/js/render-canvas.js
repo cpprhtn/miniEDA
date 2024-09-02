@@ -30,17 +30,17 @@ function draw(diagram) {
     if (node.type === "TRANSFORMER") {
       const transformerNode = /** @type {DataTransformerNode} */ (node);
 
-      if (transformerNode.from) {
+      if (transformerNode.fromNodeId) {
         mermaidText += `
-          ${transformerNode.from} --> ${transformerNode.id}
+          ${transformerNode.fromNodeId} --> ${transformerNode.id}
         `;
       }
     } else if (node.type === "PRESENTATION") {
       const presentationNode = /** @type {PresentationNode} */ (node);
 
-      if (presentationNode.from) {
+      if (presentationNode.fromNodeId) {
         mermaidText += `
-          ${presentationNode.from} --> ${presentationNode.id}
+          ${presentationNode.fromNodeId} --> ${presentationNode.id}
         `;
       }
     }

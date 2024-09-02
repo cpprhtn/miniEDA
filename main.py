@@ -6,6 +6,7 @@ from routers.casting import casting
 from routers.interpolate import interpolate
 from routers.filtering import filtering
 from routers.rename_columns import rename_columns
+from routers.canvas import canvasRouter
 import polars as pl
 from typing import Optional
 from utils.io_utils import read_file, convert_html
@@ -16,10 +17,12 @@ app.include_router(casting)
 app.include_router(interpolate)
 app.include_router(filtering)
 app.include_router(rename_columns)
+app.include_router(canvasRouter)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.on_event("startup")
 async def startup_event():
+    app.state.fileDict = {}
     app.state.templates = templates
     app.state.data_frame = None
     
