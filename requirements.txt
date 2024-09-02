@@ -3,3 +3,6 @@ numpy
 plotly
 pytest
 fastapi
+uvicorn
+python-multipart
+jinja2
