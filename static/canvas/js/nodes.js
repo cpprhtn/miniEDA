@@ -11,6 +11,7 @@ export function createDraftNode() {
     id: createId(),
     name: `새로운 노드(${createRandomString(3)})`,
     type: "DRAFT",
+    preview: null,
   };
 
   setDiagram({

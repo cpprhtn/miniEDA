@@ -74,6 +74,15 @@ export class ControllerPanelHtmlBuilder {
   }
 
   /**
+   * @param {string | null} value
+   * @returns
+   */
+  preview(value) {
+    this.contents.push({ type: "preview", value });
+    return this;
+  }
+
+  /**
    * @param {HTMLElement} container
    */
   build(container) {
@@ -120,6 +129,16 @@ export class ControllerPanelHtmlBuilder {
               <div class="controller-panel-kv-element">
                 <label>${content.label}</label>
                 <input id="${content.id}" type="text" value="${content.value}">
+              </div>
+            `;
+          case "preview":
+            return `
+              <div class="controller-panel-full-element" style="overflow-x: scroll">
+                <pre>${
+                  content.value
+                    ? content.value.replace(/\\n/g, "<br/>")
+                    : "No content"
+                }</pre>
               </div>
             `;
         }

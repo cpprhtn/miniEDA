@@ -92,4 +92,10 @@ async def run_canvas(dto: CanvasRequestDto, request: Request):
     
     request.app.state.fileDict = {}
 
-    return {}
+    result = {}
+    for node in dto.nodes:
+        if nodeDict[node.id].data is None:
+            continue
+        result[node.id] = str(nodeDict[node.id].data)
+
+    return JSONResponse(result)

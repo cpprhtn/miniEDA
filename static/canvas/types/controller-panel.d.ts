@@ -1,14 +1,15 @@
 /// <reference path="./state.d.ts" />
 /// <reference path="./nodes/index.d.ts" />
 
-type RenderControllerPanelFn = StateChangeListener<"selectedNode">;
+type RenderControllerPanelFn = StateChangeListener<"selectedNodeId">;
 
 type ControllerPanelHtmlElement =
   | ControllerPanelHtmlTitle
   | ControllerPanelHtmlText
   | ControllerPanelHtmlSelect
   | ControllerPanelHtmlFile
-  | ControllerPanelHtmlTextField;
+  | ControllerPanelHtmlTextField
+  | ControllerPanelHtmlTextPreview;
 
 type ControllerPanelHtmlTitle = {
   type: "title";
@@ -42,4 +43,9 @@ type ControllerPanelHtmlTextField = {
   label: string;
   value: string;
   onConfirm?: (value: string) => void;
+};
+
+type ControllerPanelHtmlTextPreview = {
+  type: "preview";
+  value: string | null;
 };

@@ -3,13 +3,13 @@
 /** @type {State} */
 const initialState = {
   diagram: window["data"],
-  selectedNode: null,
+  selectedNodeId: null,
 };
 
 /** @type {StateChangeListenerMap} */
 const stateChangeListenerMap = {
   diagram: [],
-  selectedNode: [],
+  selectedNodeId: [],
 };
 
 const state = new Proxy(initialState, {
@@ -25,6 +25,11 @@ export function callAllStateChangeListener() {
   Object.keys(stateChangeListenerMap).forEach((key) => {
     stateChangeListenerMap[key].forEach((listener) => listener(state[key]));
   });
+}
+
+/** @type {<K extends keyof State>(key: K) => void} */
+export function triggerStateChangeListener(key) {
+  stateChangeListenerMap[key].forEach((listener) => listener(state[key]));
 }
 
 /**

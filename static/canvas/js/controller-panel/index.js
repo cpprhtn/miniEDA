@@ -25,6 +25,7 @@ function renderDraftNodePanel(node) {
         id: node.id,
         name: node.name,
         type: "DATA",
+        preview: null,
         dataType: "LOAD_FILE",
         file: null,
       };
@@ -35,6 +36,7 @@ function renderDraftNodePanel(node) {
         id: node.id,
         name: node.name,
         type: "TRANSFORMER",
+        preview: null,
         action: "FILL_WITH_ZERO",
         fromNodeId: null,
       };
@@ -45,6 +47,7 @@ function renderDraftNodePanel(node) {
         id: node.id,
         name: node.name,
         type: "PRESENTATION",
+        preview: null,
         action: "SAVE_TO_FILE",
         fromNodeId: null,
         filePath: null,
@@ -55,7 +58,7 @@ function renderDraftNodePanel(node) {
     setGraph({
       nodes: [...graph.nodes.filter((v) => v.id !== node.id), newNode],
     });
-    renderControllerPanel(newNode);
+    renderControllerPanel(newNode.id);
   };
 
   ControllerPanelHtmlBuilder.builder()
@@ -99,6 +102,8 @@ function renderLoadFileNodePanel(node) {
     .text("Node ID", node.id)
     .text("Node name", node.name)
     .file("File", node.file, fileController)
+    .title("Preview")
+    .preview(node.preview)
     .build(panel);
 
   fileController.get().addEventListener("change", (ev) => {
@@ -106,17 +111,14 @@ function renderLoadFileNodePanel(node) {
     if (target.files && target.files[0]) {
       /** @type {LoadFileNode} */
       const newNode = {
-        id: node.id,
-        name: node.name,
-        type: "DATA",
-        dataType: "LOAD_FILE",
+        ...node,
         file: target.files[0],
       };
 
       setGraph({
         nodes: [...graph.nodes.filter((v) => v.id !== node.id), newNode],
       });
-      renderControllerPanel(newNode);
+      renderControllerPanel(newNode.id);
     }
   });
 }
@@ -166,17 +168,14 @@ function renderFillWithZeroNodePanel(node) {
 
     /** @type {FillMissingValueWithZeroTransformerNode} */
     const newNode = {
-      id: node.id,
-      name: node.name,
-      type: "TRANSFORMER",
-      action: "FILL_WITH_ZERO",
+      ...node,
       fromNodeId: fromNodeId,
     };
 
     setGraph({
       nodes: [...graph.nodes.filter((v) => v.id !== node.id), newNode],
     });
-    renderControllerPanel(newNode);
+    renderControllerPanel(newNode.id);
   };
 
   ControllerPanelHtmlBuilder.builder()
@@ -189,6 +188,8 @@ function renderFillWithZeroNodePanel(node) {
       fromNodeInputController,
       onConfirmFromNode
     )
+    .title("Preview")
+    .preview(node.preview)
     .build(panel);
 }
 
@@ -226,7 +227,7 @@ function renderSaveToFileNodePanel(node) {
     setGraph({
       nodes: [...graph.nodes.filter((v) => v.id !== node.id), newNode],
     });
-    renderControllerPanel(newNode);
+    renderControllerPanel(newNode.id);
   };
 
   /** @type {(fromNodeId: string) => void } */
@@ -265,7 +266,14 @@ function renderSaveToFileNodePanel(node) {
 }
 
 /** @type {RenderControllerPanelFn} */
-export function renderControllerPanel(node) {
+export function renderControllerPanel(nodeId) {
+  if (!nodeId) {
+    return;
+  }
+
+  const [graph] = useState("diagram");
+  const node = graph.nodes.find((v) => v.id === nodeId);
+
   if (!node) {
     return;
   }
@@ -290,4 +298,4 @@ export function renderControllerPanel(node) {
   }
 }
 
-registerStateChangeListener("selectedNode", renderControllerPanel);
+registerStateChangeListener("selectedNodeId", renderControllerPanel);

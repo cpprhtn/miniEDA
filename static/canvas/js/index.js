@@ -27,11 +27,6 @@ window.onload = () => {
  * @param {string} nodeId
  */
 window["onClickNode"] = (nodeId) => {
-  const [diagram] = useState("diagram");
-  const [, setSelectedNode] = useState("selectedNode");
-
-  const node = diagram.nodes.find((node) => node.id === nodeId);
-  if (!node) return;
-
-  setSelectedNode(node);
+  const [, setSelectedNodeId] = useState("selectedNodeId");
+  setSelectedNodeId(nodeId);
 };
