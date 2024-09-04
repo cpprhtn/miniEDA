@@ -2,7 +2,7 @@
 
 type State = {
   diagram: WorkflowGraph;
-  selectedNode: BaseNode | null;
+  selectedNodeId: string | null;
 };
 
 type StateChangeListener<K extends keyof State> = (newState: State[K]) => void;

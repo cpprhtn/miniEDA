@@ -6,4 +6,5 @@ type BaseNode<TNode extends NodeType = NodeType> = {
   id: BaseNodeId;
   name: string;
   type: TNode;
+  preview: string | null;
 };

@@ -1,4 +1,4 @@
-import { useState } from "./state.js";
+import { triggerStateChangeListener, useState } from "./state.js";
 
 /**
  * @param {File} file
@@ -24,13 +24,13 @@ async function registerFile(file) {
 }
 
 export async function run() {
-  const [diagram] = useState("diagram");
+  const [graph, setGraph] = useState("diagram");
 
   const requestBody = {
     nodes: [],
   };
 
-  for (const node of diagram.nodes) {
+  for (const node of graph.nodes) {
     if (node.type !== "DATA") {
       requestBody.nodes.push(node);
       continue;
@@ -47,11 +47,23 @@ export async function run() {
     requestBody.nodes.push({ ...rest, fileId });
   }
 
-  await fetch("/canvas/run", {
+  const response = await fetch("/canvas/run", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(requestBody),
   });
+
+  /** @type { { [key: string]: string } } */
+  const data = await response.json();
+
+  const newNodes = graph.nodes
+    .filter((node) => node.id in data)
+    .map((node) => ({ ...node, preview: data[node.id] }));
+
+  setGraph({
+    nodes: [...graph.nodes.filter((node) => !(node.id in data)), ...newNodes],
+  });
+  triggerStateChangeListener("selectedNodeId");
 }
