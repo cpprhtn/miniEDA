@@ -1,7 +1,7 @@
 import pytest
 import polars as pl
 import plotly.graph_objs as go
-from utils.visualization import plot_quality_metrics_with_alerts, create_table, check_thresholds
+from utils.visualization import *
 
 @pytest.fixture
 def quality_metrics():
