@@ -28,9 +28,9 @@ async def upload_file(
     file: UploadFile = File(...)
 ):
     fileId = id_generator.createId()
-    filePath = f"files/{file.filename}"
+    filePath = file.filename
 
-    with open(f"files/{file.filename}", "wb") as f:
+    with open(filePath, "wb") as f:
         f.write(await file.read())
 
     request.app.state.fileDict[fileId] = filePath
