@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Visualize</h1>
+<form action="/visualize" method="post">
+    <label for="x_column">X Column</label>
+    <select id="x_column" name="x_column">
+        {% for col in columns %}
+        <option value="{{ col }}">{{ col }}</option>
+        {% endfor %}
+    </select>
+    
+    <label for="y_column">Y Column (optional for some plots)</label>
+    <select id="y_column" name="y_column">
+        {% for col in columns %}
+        <option value="{{ col }}">{{ col }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="plot_type">Plot Type</label>
+    <select id="plot_type" name="plot_type">
+        <option value="scatter">Scatter Plot</option>
+        <option value="line">Line Plot</option>
+        <option value="bar">Bar Plot</option>
+        <option value="histogram">Histogram</option>
+    </select>
+    
+    <label for="max_rows">Max Rows</label>
+    <input type="number" id="max_rows" name="max_rows" value="10000">
+    
+    <button type="submit">Visualize</button>
+</form>
+{% endblock %}

@@ -10,6 +10,7 @@ from routers.canvas import canvasRouter
 import polars as pl
 from typing import Optional
 from utils.io_utils import read_file, convert_html
+from utils.visualization import *
 
 app = FastAPI()
  
@@ -103,4 +104,31 @@ async def upload_file(request: Request, file: UploadFile = File(...), csv_header
         "request": request,
         "df_head": convert_html(app.state.data_frame),
         "df_isna": convert_html(app.state.data_frame.fill_nan(None).null_count()),
+    })
+    
+@app.post("/visualize", response_class=HTMLResponse)
+async def visualize_data(
+    request: Request,
+    x_column: str = Form(...),
+    y_column: Optional[str] = Form(None),
+    plot_type: str = Form(...),
+    max_rows: int = Form(10000)
+):
+    data_frame = request.app.state.data_frame
+    if data_frame is None:
+        raise HTTPException(status_code=400, detail="No data uploaded")
+    
+    try:
+        optimized_df = optimize_dataframe_for_visualization(data_frame, max_rows=max_rows)
+        graph_html = visualize_dataframe(optimized_df, x_column, y_column, plot_type)
+    except Exception as e:
+        return templates.TemplateResponse("data_preview.html", {
+            "request": request,
+            "error_message": f"Error creating plot: {str(e)}"
+        })
+
+    return templates.TemplateResponse("visualize.html", {
+        "request": request,
+        "columns": data_frame.columns,
+        "graph_html": graph_html
     })
