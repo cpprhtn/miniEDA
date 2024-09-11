@@ -26,6 +26,7 @@ async def startup_event():
     app.state.fileDict = {}
     app.state.templates = templates
     app.state.data_frame = None
+    app.state.nodes = []
     
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
@@ -38,29 +39,31 @@ data_frame: Optional[pl.DataFrame] = None
 @app.get("/", response_class=HTMLResponse)
 async def get_index(request: Request):
     data_frame = request.app.state.data_frame
-    if data_frame is None:
-         mermaid_diagram = """
-    graph TD;
-        df1[No Data];
-    """
-    else:
-        mermaid_diagram = """
-    graph TD;
-        df1[Raw Data];
-    """
 
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "mermaid_diagram": mermaid_diagram
+        "diagram": {
+            "nodes": request.app.state.nodes,
+        }
     })
 
-@app.get("/canvas", response_class=HTMLResponse)
-async def get_canvas(request: Request):
-    return templates.TemplateResponse("canvas.html", {
+@app.post("/upload", response_class=HTMLResponse)
+async def upload_file(request: Request, file: UploadFile = File(...), csv_header: bool = Form(False)):
+    try:
+        file_type = file.filename.split('.')[-1].lower()
+        df = read_file(file.file, file_type, header=csv_header)
+        app.state.data_frame = df
+    except Exception as e:
+        return templates.TemplateResponse("index.html", {
+            "request": request, 
+            "error_message": f"Error loading dataset: {str(e)}"
+        })
+    return templates.TemplateResponse("data_preview.html", {
         "request": request,
+        "df_head": convert_html(app.state.data_frame),
+        "df_isna": convert_html(app.state.data_frame.fill_nan(None).null_count()),
         "diagram": {
-            "nodes": [
-            ],
+            "nodes": request.app.state.nodes,
         }
     })
     
@@ -88,47 +91,3 @@ async def export_csv(response: Response, request: Request):
         return Response(content=csv_data, media_type="text/csv")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to export CSV: {str(e)}")
-
-@app.post("/upload", response_class=HTMLResponse)
-async def upload_file(request: Request, file: UploadFile = File(...), csv_header: bool = Form(False)):
-    try:
-        file_type = file.filename.split('.')[-1].lower()
-        df = read_file(file.file, file_type, header=csv_header)
-        app.state.data_frame = df
-    except Exception as e:
-        return templates.TemplateResponse("index.html", {
-            "request": request, 
-            "error_message": f"Error loading dataset: {str(e)}"
-        })
-    return templates.TemplateResponse("data_preview.html", {
-        "request": request,
-        "df_head": convert_html(app.state.data_frame),
-        "df_isna": convert_html(app.state.data_frame.fill_nan(None).null_count()),
-    })
-    
-@app.post("/visualize", response_class=HTMLResponse)
-async def visualize_data(
-    request: Request,
-    x_column: str = Form(...),
-    y_column: Optional[str] = Form(None),
-    plot_type: str = Form(...),
-    max_rows: int = Form(10000)
-):
-    data_frame = request.app.state.data_frame
-    if data_frame is None:
-        raise HTTPException(status_code=400, detail="No data uploaded")
-    
-    try:
-        optimized_df = optimize_dataframe_for_visualization(data_frame, max_rows=max_rows)
-        graph_html = visualize_dataframe(optimized_df, x_column, y_column, plot_type)
-    except Exception as e:
-        return templates.TemplateResponse("data_preview.html", {
-            "request": request,
-            "error_message": f"Error creating plot: {str(e)}"
-        })
-
-    return templates.TemplateResponse("visualize.html", {
-        "request": request,
-        "columns": data_frame.columns,
-        "graph_html": graph_html
-    })
