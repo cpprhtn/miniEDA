@@ -9,6 +9,7 @@ casting = APIRouter()
 @casting.get("/type_casting", response_class=HTMLResponse, tags=['casting'])
 async def get_astype(request: Request):
     data_frame = request.app.state.data_frame
+    nodes_dict = [node.dict() for node in request.app.state.nodes]
     print(data_frame)
     if data_frame is None:
         return "No data uploaded"
@@ -17,12 +18,16 @@ async def get_astype(request: Request):
     return request.app.state.templates.TemplateResponse("type_casting.html", {
         "request": request, 
         "columns": data_frame.columns, 
-        "dtype_options": dtype_options
+        "dtype_options": dtype_options,
+        "diagram": {
+            "nodes": nodes_dict,
+        }
         })
 
 @casting.post("/type_casting", response_class=HTMLResponse, tags=['casting'])
 async def type_casting_endpoint(request: Request, column: str = Form(...), dtype: str = Form(...)):
     data_frame = request.app.state.data_frame
+    nodes_dict = [node.dict() for node in request.app.state.nodes]
     if data_frame is None:
         return "No data uploaded"
     try:
@@ -37,4 +42,7 @@ async def type_casting_endpoint(request: Request, column: str = Form(...), dtype
         "request": request,
         "df_head": convert_html(data_frame),
         "df_isna": convert_html(data_frame.fill_nan(None).null_count()),
+        "diagram": {
+            "nodes": nodes_dict,
+        }
     })

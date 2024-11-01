@@ -10,17 +10,22 @@ rename_columns = APIRouter()
 @rename_columns.get("/rename_columns", response_class=HTMLResponse)
 async def get_rename_columns(request: Request):
     data_frame = request.app.state.data_frame
+    nodes_dict = [node.dict() for node in request.app.state.nodes]
     if data_frame is None:
         return "No data uploaded"
     columns = data_frame.columns
     return request.app.state.templates.TemplateResponse("rename_column.html", {
         "request": request,
-        "columns": columns
+        "columns": columns,
+        "diagram": {
+            "nodes": nodes_dict,
+        }
     })
 
 @rename_columns.post("/rename_columns", response_class=HTMLResponse)
 async def rename_columns_endpoint(request: Request, columns: List[str] = Form(...), new_names: List[str] = Form(...)):
     data_frame = request.app.state.data_frame
+    nodes_dict = [node.dict() for node in request.app.state.nodes]
     if data_frame is None:
         return "No data uploaded"
     
@@ -39,4 +44,7 @@ async def rename_columns_endpoint(request: Request, columns: List[str] = Form(..
         "request": request,
         "df_head": convert_html(data_frame),
         "df_isna": convert_html(data_frame.fill_nan(None).null_count()),
+        "diagram": {
+            "nodes": nodes_dict,
+        }
     })

@@ -50,44 +50,6 @@ async def get_index(request: Request):
         }
     })
 
-@app.post("/upload", response_class=HTMLResponse)
-async def upload_file(request: Request, file: UploadFile = File(...), csv_header: bool = Form(False)):
-    try:
-        file_type = file.filename.split('.')[-1].lower()
-        df = read_file(file.file, file_type, header=csv_header)
-        app.state.data_frame = df
-        
-        node_id = id_generator.createId()
-        new_node = LoadFileNode(
-            id=node_id,
-            name=file.filename,
-            type="DATA",
-            dataType="LOAD_FILE",
-            fileId=node_id
-        )
-
-        if not new_node.validate():
-            raise Exception("Invalid node configuration")
-
-        app.state.nodes.append(new_node)
-
-    except Exception as e:
-        return templates.TemplateResponse("index.html", {
-            "request": request, 
-            "error_message": f"Error loading dataset: {str(e)}"
-        })
-    
-    nodes_dict = [node.dict() for node in app.state.nodes]
-
-    return templates.TemplateResponse("data_preview.html", {
-        "request": request,
-        "df_head": convert_html(app.state.data_frame),
-        "df_isna": convert_html(app.state.data_frame.fill_nan(None).null_count()),
-        "diagram": {
-            "nodes": nodes_dict,
-        }
-    })
-
     
 @app.get("/data_preview", response_class=HTMLResponse)
 async def get_data_preview(request: Request):
@@ -108,7 +70,6 @@ async def get_data_preview(request: Request):
 @app.get("/export_csv")
 async def export_csv(response: Response, request: Request):
     data_frame = request.app.state.data_frame
-    nodes_dict = [node.dict() for node in request.app.state.nodes]
     if data_frame is None:
         raise HTTPException(status_code=404, detail="No data uploaded")
     try:
@@ -118,3 +79,64 @@ async def export_csv(response: Response, request: Request):
         return Response(content=csv_data, media_type="text/csv")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to export CSV: {str(e)}")
+
+@app.post("/upload", response_class=HTMLResponse)
+async def upload_file(request: Request, file: UploadFile = File(...), csv_header: bool = Form(False)):
+    try:
+        file_type = file.filename.split('.')[-1].lower()
+        df = read_file(file.file, file_type, header=csv_header)
+        app.state.data_frame = df
+        node_id = id_generator.createId()
+        new_node = LoadFileNode(
+            id=node_id,
+            name=file.filename,
+            type="DATA",
+            dataType="LOAD_FILE",
+            fileId=node_id
+        )
+        if not new_node.validate():
+            raise Exception("Invalid node configuration")
+        app.state.nodes.append(new_node)
+        
+    except Exception as e:
+        return templates.TemplateResponse("index.html", {
+            "request": request, 
+            "error_message": f"Error loading dataset: {str(e)}"
+        })
+        
+    nodes_dict = [node.dict() for node in app.state.nodes]
+    return templates.TemplateResponse("data_preview.html", {
+        "request": request,
+        "df_head": convert_html(app.state.data_frame),
+        "df_isna": convert_html(app.state.data_frame.fill_nan(None).null_count()),
+        "diagram": {
+            "nodes": nodes_dict,
+        }
+    })
+    
+@app.post("/visualize", response_class=HTMLResponse)
+async def visualize_data(
+    request: Request,
+    x_column: str = Form(...),
+    y_column: Optional[str] = Form(None),
+    plot_type: str = Form(...),
+    max_rows: int = Form(10000)
+):
+    data_frame = request.app.state.data_frame
+    if data_frame is None:
+        raise HTTPException(status_code=400, detail="No data uploaded")
+    
+    try:
+        optimized_df = optimize_dataframe_for_visualization(data_frame, max_rows=max_rows)
+        graph_html = visualize_dataframe(optimized_df, x_column, y_column, plot_type)
+    except Exception as e:
+        return templates.TemplateResponse("data_preview.html", {
+            "request": request,
+            "error_message": f"Error creating plot: {str(e)}"
+        })
+
+    return templates.TemplateResponse("visualize.html", {
+        "request": request,
+        "columns": data_frame.columns,
+        "graph_html": graph_html
+    })

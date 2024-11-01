@@ -10,6 +10,7 @@ interpolate = APIRouter()
 @interpolate.get("/fill_interpolation", response_class=HTMLResponse)
 async def fill_interpolation_get(request: Request):
     data_frame = request.app.state.data_frame
+    nodes_dict = [node.dict() for node in request.app.state.nodes]
     if data_frame is None:
         return "No data uploaded"
     
@@ -17,7 +18,10 @@ async def fill_interpolation_get(request: Request):
     return request.app.state.templates.TemplateResponse("fill_interpolation.html", {
         "request": request,
         "columns": data_frame.columns,
-        "fill_option": fill_option
+        "fill_option": fill_option,
+        "diagram": {
+            "nodes": nodes_dict,
+        }
     })
     
 @interpolate.post("/fill_interpolation", response_class=HTMLResponse)
@@ -27,6 +31,7 @@ async def fill_interpolation_post(
     fill_null: str = Form("linear")
 ):
     data_frame = request.app.state.data_frame
+    nodes_dict = [node.dict() for node in request.app.state.nodes]
     if data_frame is None:
         return "No data uploaded"
 
@@ -49,4 +54,7 @@ async def fill_interpolation_post(
         "request": request,
         "df_head": convert_html(data_frame),
         "df_isna": convert_html(data_frame.null_count()),
+        "diagram": {
+            "nodes": nodes_dict,
+        }
     })
