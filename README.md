@@ -1,55 +1,42 @@
-## miniEDA: A Tool for Simplifying Data Analysis, Preprocessing, and Quality Management
+re: 구상안.
 
-### Overview
+구글같이 심플페이지
 
-**miniEDA** is a lightweight, user-friendly data exploration and analysis tool designed to simplify data preprocessing and quality management. Leveraging the power of `polars` for efficient data handling and `FastAPI` for seamless interactions, miniEDA aims to streamline exploratory data analysis (EDA) processes. The platform is designed with a session-based approach, enabling effective dataset management, transformation, and detailed logging of operations.
+1. 파일 업로드 기능
+사용자가 CSV, Excel, JSON 등의 데이터를 웹페이지에 업로드할 수 있는 기능.
+데이터 미리보기 기능 (업로드 후 데이터가 어떻게 보일지 미리 확인).
 
-For an existing version using `streamlit`, please click [here](https://github.com/cpprhtn/miniEDA/tree/streamlit).
+2. 데이터 탐색 기능
+기초 통계량: 데이터의 평균, 표준편차, 최솟값, 최댓값 등의 통계 정보를 제공.
+열 정보 표시: 각 열의 데이터 유형, null 값 개수 등을 표시.
+샘플 데이터 표시: 상위/하위 n개 행을 미리보기 형식으로 제공.
 
-### Key Features
+3. 데이터 클리닝 및 변환
+결측값 처리: 결측값을 채우기(예: 0, 평균 등) 또는 삭제하는 기능.
+중복 데이터 제거: 중복된 행을 쉽게 제거할 수 있는 기능.
+열 삭제 및 선택: 불필요한 열을 삭제하거나 특정 열만 선택할 수 있는 기능.
+열 이름 변경: 사용자에게 직관적인 이름 변경 기능 제공.
+데이터 타입 변환: 열의 데이터 타입을 수치형, 범주형 등으로 변환할 수 있는 기능.
 
-- **No-Code Data Preprocessing and Visualization**: miniEDA provides an intuitive interface for data transformations and visualizations without the need for coding, making it accessible to both technical and non-technical users.
-- **Enhanced Data Quality Management**: The tool incorporates robust data quality checks, addressing completeness, timeliness, validity, accuracy, consistency, and uniqueness, to ensure high standards across datasets.
-- **Session-Based Data Management**: The session-based architecture supports comprehensive data management and transformation history, facilitating reproducibility and efficient tracking of changes.
+4. 데이터 변환 기능
+필터링: 특정 조건에 맞는 데이터를 필터링하여 새로운 DataFrame을 만들 수 있는 기능.
+정렬: 특정 열을 기준으로 데이터를 오름차순 또는 내림차순으로 정렬.
+그룹화: 특정 열을 기준으로 데이터를 그룹화하고 집계하는 기능.
+열 추가: 계산을 통해 새로운 열을 추가하거나 변환하는 기능.
+텍스트 데이터 처리: 문자열 데이터에서 필요한 정보 추출, 대소문자 변환, 공백 제거 등의 작업.
 
-### Purpose
+5. 시각화
+간단한 시각화: 데이터 프레임의 일부를 선택해 간단한 차트나 그래프(히스토그램, 바 차트 등)로 시각화하는 기능.
+통계적 시각화: 데이터의 분포나 관계를 시각적으로 확인할 수 있는 기능.
 
-Data organizations often spend 30-40% of their time addressing data quality issues rather than focusing on value-adding tasks. miniEDA is designed to reduce these overheads by offering a reliable solution to common data quality problems. With its no-code interface, miniEDA empowers domain experts and non-developers to engage more actively with data, promoting more effective exploration and utilization. This approach not only democratizes data access but also boosts overall project efficiency and output.
+6. 다운로드 및 저장
+데이터 저장: 전처리된 데이터를 다시 다운로드할 수 있도록 CSV, Excel 등으로 저장하는 기능.
+변경 사항 적용: 사용자가 변경한 사항을 바로 적용하고, 데이터에 반영된 결과를 실시간으로 보여주는 기능.
 
-### Installation
+7. 작업 이력 관리
+변경 이력: 각 전처리 단계에서 적용한 변경 사항을 기록하고 되돌리기 기능을 제공.
+워크플로우 저장: 특정 전처리 작업을 워크플로우 형태로 저장하여, 반복적으로 사용할 수 있게 제공.
 
-To install miniEDA, clone the repository and install the required dependencies. Python 3.11 or higher is recommended:
-
-```sh
-git clone https://github.com/cpprhtn/miniEDA.git
-cd miniEDA
-pip install -r requirements.txt
-```
-
-### Usage
-
-To start the FastAPI server, run the following command:
-
-```sh
-uvicorn main:app --reload
-```
-
-Access the application in your web browser at `http://localhost:8000`.
-
-### Contributing
-
-We welcome contributions! Please fork the repository and submit a pull request with your changes. Ensure that your code adheres to the project's coding standards and includes relevant tests.
-
-### License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
-
-### Future Enhancements
-
-- **Advanced Analytics**: Integration of machine learning and advanced statistical analysis features.
-- **Enhanced Data Visualization**: Development of advanced data visualization and dashboarding capabilities.
-- **Broader Integration**: Expansion to connect with additional data sources and storage solutions.
-
-### Contact
-
-For more information or to report issues, please visit the [issues](https://github.com/cpprhtn/miniEDA/issues) page or contact us directly.
+8. 사용자 친화적인 UI/UX
+드래그 앤 드롭: 파일 업로드, 열 선택 등의 작업을 드래그 앤 드롭으로 쉽게 처리할 수 있도록.
+직관적인 버튼 및 메뉴: 사용자에게 직관적인 UI를 제공하여, 복잡한 작업을 쉽게 할 수 있도록.
