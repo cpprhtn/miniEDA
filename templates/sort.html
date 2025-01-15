@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Sort Data</h1>
+<form action="/sort_data" method="post">
+    <label for="column">Select Column:</label>
+    <select id="column" name="column">
+        <option value="__all__">전체 선택</option>
+        {% for col in columns %}
+        <option value="{{ col }}">{{ col }}</option>
+        {% endfor %}
+    </select><br>
+    
+    <label for="param">정렬방법 선택:</label>
+    <select id="param" name="param">
+        {% for fill in param %}
+        <option value="{{ fill }}">{{ fill }}</option>
+        {% endfor %}
+    </select><br>
+    
+    <button type="submit">Apply</button>
+</form>
+{% endblock %}
