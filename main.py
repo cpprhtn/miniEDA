@@ -55,12 +55,14 @@ async def get_index(request: Request):
 async def get_data_preview(request: Request):
     data_frame = request.app.state.data_frame
     nodes_dict = [node.dict() for node in request.app.state.nodes]
+    print(data_frame.describe())
     if data_frame is None:
         return "No data uploaded"
     return templates.TemplateResponse("data_preview.html", {
         "request": request,
         "df_head": convert_html(data_frame),
         "df_shape": data_frame.shape,
+        "df_describe": convert_html(data_frame.describe()),
         "df_isna": convert_html(data_frame.fill_nan(None).null_count()),
         "diagram": {
             "nodes": nodes_dict,
