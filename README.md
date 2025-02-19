@@ -4,7 +4,9 @@
 
 **miniEDA** is a lightweight, user-friendly data exploration and analysis tool designed to simplify data preprocessing and quality management. Leveraging the power of `polars` for efficient data handling and `FastAPI` for seamless interactions, miniEDA aims to streamline exploratory data analysis (EDA) processes. The platform is designed with a session-based approach, enabling effective dataset management, transformation, and detailed logging of operations.
 
-For an existing version using `streamlit`, please click [here](https://github.com/cpprhtn/miniEDA/tree/streamlit).
+For an existing version using `streamlit`, please click [here](https://github.com/cpprhtn/miniEDA/tree/streamlit).  
+! Streamlit Version Demo
+![Image](https://github.com/user-attachments/assets/35ddd1e8-aabf-42b6-914e-7a14b1b4c8b7)
 
 ### Key Features
 
